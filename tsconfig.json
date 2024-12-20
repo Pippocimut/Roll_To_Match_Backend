@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": false,
+        "noEmitOnError": true,
+        "removeComments": false,
+        "moduleResolution": "nodenext",
+        "module": "NodeNext",
+        "sourceMap": true,
+        "outDir": "./built",
+        "allowJs": true,
+        "target": "ES2024"
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}
