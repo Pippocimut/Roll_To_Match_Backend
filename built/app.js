@@ -8,6 +8,7 @@ const express_1 = __importDefault(require("express"));
 const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
 const authMiddleware_1 = require("./middlewares/authMiddleware");
+const index_1 = __importDefault(require("./routes/index"));
 const app = (0, express_1.default)();
 require('dotenv').config();
 const MONGO_URL = process.env.MONGO_URL;
@@ -20,7 +21,7 @@ app.use((req, res, next) => {
 });
 app.use('/auth', authRouter);
 app.use(authMiddleware_1.auth);
-app.use('/api');
+app.use('/api', index_1.default);
 app.use(errorRouter);
 mongoose.connect(MONGO_URL).then(() => {
     app.listen(PORT, () => {

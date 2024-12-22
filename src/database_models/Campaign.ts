@@ -1,45 +1,6 @@
 import mongoose, { InferSchemaType } from "mongoose";
-import { decodedTextSpanIntersectsWith } from "typescript";
-
-export const PlayerSchema = new mongoose.Schema({
-    id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: false
-    },
-    slug: {
-        type: String,
-        required: false
-    },
-    email: {
-        type: String,
-        required: false
-    }
-});
-
-export const ReviewScheam = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    stars: {
-        type: Number,
-        required: true,
-        default: 7
-    },
-    title: {
-        type: String,
-        required: true
-    },
-    message: {
-        type: String,
-        required: true
-    },
-    registeredAt: {
-        type: Date,
-        default: Date.now
-    }
-})
+import { ReviewSchema } from "./Review";
+import { PlayerSchema } from "./Player";
 
 export const CampaignSchema = new mongoose.Schema({
     title: {
@@ -56,7 +17,7 @@ export const CampaignSchema = new mongoose.Schema({
         required: false
     },
     reviews: [{
-        type: ReviewScheam,
+        type: ReviewSchema,
         required: false,
         default: []
     }],
@@ -86,6 +47,5 @@ export const CampaignSchema = new mongoose.Schema({
 });
 
 export const CampaignModel = mongoose.model('Campaign', CampaignSchema);
-
 export type PersistedCampaign = InferSchemaType<typeof CampaignSchema>;
 

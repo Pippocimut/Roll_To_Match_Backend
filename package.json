@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc --build & npm run src/app.js",
+    "start": "tsc --build & node built/app.js",
     "build": "tsc --build"
   },
   "author": "",
@@ -22,6 +22,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "typescript": "^5.7.2"
   }

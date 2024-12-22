@@ -4,6 +4,15 @@ import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
 import mongoose from "mongoose"
 const { ObjectId, DocumentArray } = mongoose.Types;
 
+export class RoomController {
+    public static createRoom = createRoom;
+    public static getRooms = getRooms;
+    public static getRoom = getRoom;
+    public static updateRoom = updateRoom;
+    public static deleteRoom = deleteRoom;
+}
+
+
 export async function createRoom(req, res) {
     const createRoomDTO = CreateRoomZodSchema.parse(req.body);
     const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse(req.user)

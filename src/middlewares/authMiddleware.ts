@@ -11,7 +11,6 @@ export function auth(req, res, next) {
         return res.status(401).send({ message: 'Access denied' })
     }
     try {
-        
         const verified = verify(token, process.env.TOKEN_SECRET)
         req.user = verified
         next()

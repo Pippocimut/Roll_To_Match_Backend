@@ -3,46 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CampaignModel = exports.CampaignSchema = exports.ReviewScheam = exports.PlayerSchema = void 0;
+exports.CampaignModel = exports.CampaignSchema = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-exports.PlayerSchema = new mongoose_1.default.Schema({
-    id: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: 'User',
-        required: false
-    },
-    slug: {
-        type: String,
-        required: false
-    },
-    email: {
-        type: String,
-        required: false
-    }
-});
-exports.ReviewScheam = new mongoose_1.default.Schema({
-    user: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    stars: {
-        type: Number,
-        required: true,
-        default: 7
-    },
-    title: {
-        type: String,
-        required: true
-    },
-    message: {
-        type: String,
-        required: true
-    },
-    registeredAt: {
-        type: Date,
-        default: Date.now
-    }
-});
+const Review_1 = require("./Review");
+const Player_1 = require("./Player");
 exports.CampaignSchema = new mongoose_1.default.Schema({
     title: {
         type: String,
@@ -58,7 +22,7 @@ exports.CampaignSchema = new mongoose_1.default.Schema({
         required: false
     },
     reviews: [{
-            type: exports.ReviewScheam,
+            type: Review_1.ReviewSchema,
             required: false,
             default: []
         }],
@@ -72,12 +36,12 @@ exports.CampaignSchema = new mongoose_1.default.Schema({
             required: true
         }],
     playerQueue: [{
-            type: exports.PlayerSchema,
+            type: Player_1.PlayerSchema,
             required: false,
             default: []
         }],
     activePlayers: [{
-            type: exports.PlayerSchema,
+            type: Player_1.PlayerSchema,
             required: false,
             default: []
         }],

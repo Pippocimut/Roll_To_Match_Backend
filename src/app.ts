@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 import express from 'express';
+import "dotenv/config";
 const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
 import {auth as onlyAuthorizedUsers} from './middlewares/authMiddleware';
+import indexRoutes from './routes/index';
 const app = express();
-require('dotenv').config();
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT;
@@ -20,7 +21,7 @@ app.use((req, res, next) => {
 app.use('/auth', authRouter);
 
 app.use(onlyAuthorizedUsers);
-app.use('/api');
+app.use('/api',indexRoutes);
 
 app.use(errorRouter);
 
