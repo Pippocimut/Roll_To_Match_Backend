@@ -6,6 +6,7 @@ export const CreateCampaignZodSchema = z.object({
     description: z.string(),
     room: z.string(),
     tags: z.array(z.string()).min(1),
+    location : z.string().optional()
 }).refine(data => {
     const getRoom = RoomModel.findById(data.room)
     if (!getRoom) {

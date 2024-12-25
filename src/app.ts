@@ -1,16 +1,27 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 import express from 'express';
 import "dotenv/config";
+import { auth as onlyAuthorizedUsers } from './middlewares/authMiddleware';
+import indexRoutes from './routes/index';
+
 const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
-import {auth as onlyAuthorizedUsers} from './middlewares/authMiddleware';
-import indexRoutes from './routes/index';
+
+const session = require('express-session');
 const app = express();
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT;
 
 app.use(express.json());
+app.set('view engine', 'ejs');
+app.use(express.static("public"));
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+
 app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {

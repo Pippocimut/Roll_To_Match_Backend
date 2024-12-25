@@ -30,6 +30,10 @@ export const CampaignSchema = new mongoose.Schema({
         type: String,
         required: true
     }],
+    location: {
+        type: String,
+        required: false
+    },
     playerQueue: [{
         type: PlayerSchema,
         required: false,

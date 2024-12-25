@@ -1,19 +1,15 @@
-import mongoose, { InferSchemaType } from 'mongoose';
+import mongoose, { Schema, InferSchemaType } from 'mongoose';
 
-export const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
     username: {
         type: String,
         required: true
     },
-    slug:{
+    slug: {
         type: String,
         required: true
     },
     email: {
-        type: String,
-        required: true
-    },
-    password: {
         type: String,
         required: true
     },
@@ -23,6 +19,28 @@ export const UserSchema = new mongoose.Schema({
     }
 });
 
-export const UserModel = mongoose.model('User', UserSchema);
+UserSchema.set('discriminatorKey', 'kind');
+
+const GoogleUserSchema = new Schema({
+    googleId: {
+        type: String,
+        required: true
+    }
+});
+
+const LocalUserSchema = new Schema({
+    password: {
+        type: String,
+        required: true
+    }
+});
+
+const UserModel = mongoose.model('User', UserSchema);
+const GoogleUserModel = UserModel.discriminator('GoogleUser', GoogleUserSchema);
+const LocalUserModel = UserModel.discriminator('LocalUser', LocalUserSchema);
+
+export { UserModel, GoogleUserModel, LocalUserModel };
 
 export type PersistedUser = InferSchemaType<typeof UserSchema>;
+export type PersistedGoogleUser = InferSchemaType<typeof GoogleUserSchema>;
+export type PersistedLocalUser = InferSchemaType<typeof LocalUserSchema>;

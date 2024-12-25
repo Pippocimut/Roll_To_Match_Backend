@@ -35,6 +35,10 @@ exports.CampaignSchema = new mongoose_1.default.Schema({
             type: String,
             required: true
         }],
+    location: {
+        type: String,
+        required: false
+    },
     playerQueue: [{
             type: Player_1.PlayerSchema,
             required: false,

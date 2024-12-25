@@ -31,6 +31,7 @@ async function createCampaign(req, res) {
         description: campaignDTO.description,
         owner: new ObjectId(userCheckDTO.user),
         room: new ObjectId(campaignDTO.room),
+        location: campaignDTO.location,
         tags: campaignDTO.tags,
         registeredAt: new Date(),
         reviews: new DocumentArray([]),

@@ -8,6 +8,7 @@ exports.UpdateCampaignZodSchema = zod_1.z.object({
     description: zod_1.z.string(),
     owner: zod_1.z.string(),
     room: zod_1.z.string(),
+    location: zod_1.z.string().optional(),
     tags: zod_1.z.array(zod_1.z.string()).min(1),
 }).refine(data => {
     const getRoom = Room_1.RoomModel.findById(data.room);

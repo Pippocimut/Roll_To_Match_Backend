@@ -5,20 +5,32 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc --build & node built/app.js",
+    "start": "docker image  build -t roll-to-match:1 . && docker container run -d --name Staging --publish 80:3000 roll-to-match:1",
+    "restart": "docker container stop Staging && docker container rm Staging && docker image  build -t roll-to-match:1 . && docker container run -d --name Staging --publish 80:3000 roll-to-match:1",
     "build": "tsc --build"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/firebase": "^2.4.32",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.16",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
     "express": "^4.21.1",
+    "express-session": "^1.18.1",
     "express-validator": "^7.2.0",
+    "firebase": "^11.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.3",
+    "mongoose-findorcreate": "^4.0.0",
     "nodemon": "^3.1.7",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "ts-node": "^10.9.2",
+    "tsc": "^2.0.4",
     "zod": "^3.24.1"
   },
   "devDependencies": {
