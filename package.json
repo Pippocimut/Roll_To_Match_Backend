@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^9.3.0",
     "@types/ejs": "^3.1.5",
     "@types/firebase": "^2.4.32",
     "@types/passport": "^1.0.17",
@@ -28,6 +29,7 @@
     "mongoose-findorcreate": "^4.0.0",
     "nodemon": "^3.1.7",
     "passport": "^0.7.0",
+    "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
     "ts-node": "^10.9.2",
     "tsc": "^2.0.4",

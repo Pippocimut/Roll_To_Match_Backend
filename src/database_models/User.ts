@@ -28,6 +28,13 @@ const GoogleUserSchema = new Schema({
     }
 });
 
+const FacebookUserSchema = new Schema({
+    facebookId: {
+        type: String,
+        required: true
+    }
+});
+
 const LocalUserSchema = new Schema({
     password: {
         type: String,
@@ -37,9 +44,10 @@ const LocalUserSchema = new Schema({
 
 const UserModel = mongoose.model('User', UserSchema);
 const GoogleUserModel = UserModel.discriminator('GoogleUser', GoogleUserSchema);
+const FacebookUserModel = UserModel.discriminator('FacebookUser', FacebookUserSchema);
 const LocalUserModel = UserModel.discriminator('LocalUser', LocalUserSchema);
 
-export { UserModel, GoogleUserModel, LocalUserModel };
+export { UserModel, GoogleUserModel, FacebookUserModel, LocalUserModel };
 
 export type PersistedUser = InferSchemaType<typeof UserSchema>;
 export type PersistedGoogleUser = InferSchemaType<typeof GoogleUserSchema>;

@@ -29,6 +29,13 @@ app.use((req, res, next) => {
     next();
 });
 
+app.post('/send-location', (req, res) => {
+    console.log(req.body);
+    console.log(req.body.lat);
+    res.send('Location received');
+});
+
+
 app.use('/auth', authRouter);
 
 app.use(onlyAuthorizedUsers);
