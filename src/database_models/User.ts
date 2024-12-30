@@ -50,5 +50,5 @@ const LocalUserModel = UserModel.discriminator('LocalUser', LocalUserSchema);
 export { UserModel, GoogleUserModel, FacebookUserModel, LocalUserModel };
 
 export type PersistedUser = InferSchemaType<typeof UserSchema>;
-export type PersistedGoogleUser = InferSchemaType<typeof GoogleUserSchema>;
-export type PersistedLocalUser = InferSchemaType<typeof LocalUserSchema>;
+export type PersistedGoogleUser = InferSchemaType<typeof GoogleUserSchema> & PersistedUser;
+export type PersistedLocalUser = InferSchemaType<typeof LocalUserSchema> & PersistedUser;

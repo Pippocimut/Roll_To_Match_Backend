@@ -1,97 +1,113 @@
-import { RoomModel } from "../database_models/Room";
-import mongoose from "mongoose";
 import { CreateCampaignDTO, CreateCampaignZodSchema } from "../dto/CreateCampaignDTO";
-import { CampaignModel, PersistedCampaign } from "../database_models/Campaign";
 import { UpdateCampaignDTO, UpdateCampaignZodSchema } from "../dto/UpdateCampaignDTO";
 import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
-import { MongoDocument } from "../types";
-
-const { ObjectId, DocumentArray } = mongoose.Types;
+import { SearchCampaignDTO, SearchCampaignZodSchema } from "../dto/SearchCampaignDTO";
+import { CampaignService } from "../services/CampaignService";
+import CampaignAdapter from "../adapters/Campaign";
+import { Request, Response } from "express";
+import { CampaignCheckDTO, CampaignCheckZodSchema } from "../dto/CampaignCheckDTO";
 
 export class CampaignController {
-    public static createCampaign = createCampaign;
-    public static getCampaigns = getCampaigns;
-    public static getCampaign = getCampaign;
-    public static updateCampaign = updateCampaign;
-    public static deleteCampaign = deleteCampaign;
-}
 
-async function createCampaign(req, res) {
-    const getRoom = await RoomModel.findById(req.params.id);
-    if (!getRoom) {
-        return res.status(400).send({ message: 'Room does not exist' })
-    }
-    const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
-    const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse(req.user)
-    const campaign: PersistedCampaign = {
-        title: campaignDTO.title,
-        description: campaignDTO.description,
-        owner: new ObjectId(userCheckDTO.user),
-        room: new ObjectId(campaignDTO.room),
-        location: campaignDTO.location,
-        tags: campaignDTO.tags,
-        registeredAt: new Date(),
-        reviews: new DocumentArray([]),
-        playerQueue: new DocumentArray([]),
-        activePlayers: new DocumentArray([]),
-    }
+    private static instance: CampaignController;
+    private campaignService: CampaignService;
 
-    const campaignCreated = await CampaignModel.create(campaign);
-    if (!campaignCreated) {
-        return res.status(400).send({ message: 'Error creating campaign' })
-    }
-
-    res.status(201).send(campaign);
-}
-
-async function getCampaigns(req, res) {
-    try {
-        const campaigns: MongoDocument<PersistedCampaign>[] = await CampaignModel.find();
-        res.send(campaigns);
-    } catch (err) {
-        res.status(400).send(err);
-    }
-}
-
-async function getCampaign(req, res) {
-    try {
-        const campaign: MongoDocument<PersistedCampaign> = await CampaignModel.findById(req.params.id);
-        if (!campaign) {
-            return res.status(404).send({ message: 'Campaign not found' })
+    public static getInstance(): CampaignController {
+        if (!CampaignController.instance) {
+            CampaignController.instance = new CampaignController(new CampaignService());
         }
-        res.send(campaign);
-    } catch (err) {
-        res.status(400).send(err);
+        return CampaignController.instance;
     }
-}
 
-async function updateCampaign(req, res) {
-    const updateCampaignDTO: UpdateCampaignDTO = UpdateCampaignZodSchema.parse(req.body)
-    try {
-        const campaign = await CampaignModel.findByIdAndUpdate(req.params.id, updateCampaignDTO, { new: true });
-        res.send(campaign);
+    public constructor(campaignService: CampaignService) {
+        this.campaignService = campaignService;
     }
-    catch (err) {
-        res.status(400).send(err);
-    }
-}
 
+    public async createCampaign(req: Request, res: Response): Promise<void> {
+        const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
+        const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
 
-async function deleteCampaign(req, res) {
-    const getCampaign: MongoDocument<PersistedCampaign> = await CampaignModel.findById(req.params.id).exec();
-    const forceDelete: boolean = req.params.forceDelete ? true : false
-    if (!getCampaign) {
-        return res.status(400).send({ message: 'Campaign does not exist' })
-    }
-    if (getCampaign.owner.toString() !== req.user.user) {
-        return res.status(401).send({ message: 'Unauthorized' })
-    }
-    if (getCampaign.activePlayers.length > 0) {
-        if (!forceDelete) {
-            return res.status(400).send({ message: 'Campaign has active players inside use force delete or kick players from campaign' })
+        try {
+            const campaign = await this.campaignService.createCampaign(campaignDTO, userCheckDTO)
+            res.status(201).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign));
+        } catch (err) {
+            this.CampaignControllerHandleError(err, res)
         }
     }
 
-    const deletedRoom = await RoomModel.deleteOne(getCampaign._id)
-    res.send("room deleted")
+    public async getCampaigns(req: Request & { user: string }, res: Response): Promise<void> {
+        const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
+        const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
+
+        try {
+            const campaigns = await this.campaignService.getCampaigns(searchParamsDTO, userCheckDTO.id)
+            res.status(200).send(campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign));
+        } catch (err) {
+            this.CampaignControllerHandleError(err, res)
+        }
+    }
+
+    public async getCampaign(req: Request, res: Response): Promise<void> {
+        const campaignCheckDTO: CampaignCheckDTO = CampaignCheckZodSchema.parse(req.params)
+
+        try {
+            const campaign = await this.campaignService.getCampaign(req.params.id)
+            res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign));
+        } catch (err) {
+            this.CampaignControllerHandleError(err, res)
+        }
+    }
+
+    public async updateCampaign(req: Request, res: Response): Promise<void> {
+        const updateCampaignDTO: UpdateCampaignDTO = UpdateCampaignZodSchema.parse(req.body)
+        const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
+        const campaignCheckDTO: CampaignCheckDTO = CampaignCheckZodSchema.parse(req.params)
+
+        if (campaignCheckDTO.campaign.owner && campaignCheckDTO.campaign.owner.toString() !== userCheckDTO.id) {
+            res.status(401).send({ message: 'Unauthorized' })
+            return
+        }
+
+        try {
+            const campaign = await this.campaignService.updateCampaign(req.params.id, updateCampaignDTO)
+            res.status(200).send(campaign);
+        }
+        catch (err) {
+            this.CampaignControllerHandleError(err, res)
+        }
+    }
+
+
+    public async deleteCampaign(req: Request, res: Response): Promise<void> {
+        const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
+        const campaignCheckDTO: CampaignCheckDTO = CampaignCheckZodSchema.parse(req.params)
+
+        if (campaignCheckDTO.campaign.owner && campaignCheckDTO.campaign.owner.toString() !== userCheckDTO.id) {
+            res.status(401).send({ message: 'Unauthorized' })
+            return
+        }
+
+        try {
+            const campaign = await this.campaignService.deleteCampaign(req.params.id)
+            res.status(200).send(campaign);
+        }
+        catch (err) {
+            this.CampaignControllerHandleError(err, res)
+        }
+    }
+
+    private CampaignControllerHandleError(err: any, res: Response) {
+        switch (err.name) {
+            case 'ValidationError':
+                res.status(400).send({ message: err.message })
+                break;
+            case 'AuthorizationError':
+                res.status(401).send({ message: err.message })
+                break;
+            default:
+                res.status(500).send({ message: 'Internal server error' })
+                break;
+        }
+        console.error(err)
+    }
 }

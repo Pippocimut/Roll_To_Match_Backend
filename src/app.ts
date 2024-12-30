@@ -3,6 +3,7 @@ import express from 'express';
 import "dotenv/config";
 import { auth as onlyAuthorizedUsers } from './middlewares/authMiddleware';
 import indexRoutes from './routes/index';
+import path from 'path';
 
 const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
@@ -15,7 +16,7 @@ const PORT = process.env.PORT;
 
 app.use(express.json());
 app.set('view engine', 'ejs');
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,

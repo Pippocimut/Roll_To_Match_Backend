@@ -31,8 +31,15 @@ export const CampaignSchema = new mongoose.Schema({
         required: true
     }],
     location: {
-        type: String,
-        required: false
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
     },
     playerQueue: [{
         type: PlayerSchema,
@@ -46,7 +53,7 @@ export const CampaignSchema = new mongoose.Schema({
     }],
     owner: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
     }
 });
 

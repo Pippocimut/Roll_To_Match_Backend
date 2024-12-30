@@ -17,10 +17,10 @@ router.delete('/room/:id', RoomController.deleteRoom);
 router.post('/room/:id/campaign', RoomCampaignController.createCampaign);
 router.get('/room/:id/campaigns', RoomCampaignController.getCampaigns);
 
-router.get('campaigns', CampaignController.getCampaign);
-router.get('campaign/:id', CampaignController.getCampaign);
-router.put('campaign/:id', CampaignController.updateCampaign);
-router.delete('campaign/:id', CampaignController.deleteCampaign);
+router.get('campaigns', CampaignController.getInstance().getCampaign);
+router.get('campaign/:id', CampaignController.getInstance().getCampaign);
+router.put('campaign/:id', CampaignController.getInstance().updateCampaign);
+router.delete('campaign/:id', CampaignController.getInstance().deleteCampaign);
 
 router.post('campaign/:id/review', ReviewController.createReview);
 router.get('campaign/:id/reviews', ReviewController.getReviews);

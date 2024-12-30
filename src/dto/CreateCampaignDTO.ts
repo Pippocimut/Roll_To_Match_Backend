@@ -6,12 +6,16 @@ export const CreateCampaignZodSchema = z.object({
     description: z.string(),
     room: z.string(),
     tags: z.array(z.string()).min(1),
-    location : z.string().optional()
+    location : z.object({
+        lat: z.number(),
+        lng: z.number()
+    })
 }).refine(data => {
     const getRoom = RoomModel.findById(data.room)
     if (!getRoom) {
         throw new Error('Room does not exist')
     }
+
     return true
 })
 
