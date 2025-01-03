@@ -4,11 +4,34 @@
         "noEmitOnError": true,
         "removeComments": false,
         "moduleResolution": "nodenext",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "module": "NodeNext",
         "sourceMap": true,
         "outDir": "./built",
         "allowJs": true,
-        "target": "ES2024"
+        "target": "ES2024",
+        "baseUrl": "./src",
+        "paths": {
+            "@roll-to-match/models": [
+                "database-models"
+            ],
+            "@roll-to-match/models-test/*": [
+                "database-models/__test__/*"
+            ],
+            "@roll-to-match/dto": [
+                "dto"
+            ],
+            "@roll-to-match/dto-test/*": [
+                "dto/__test__/*"
+            ],
+            "@roll-to-match/types": [
+                "data-types"
+            ],
+            "@roll-to-match/services": [
+                "services"
+            ]
+        }
     },
     "include": [
         "./src/**/*"

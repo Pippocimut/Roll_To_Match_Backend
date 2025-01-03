@@ -1,4 +1,5 @@
-import { PersistedRoom, RoomModel } from "../database_models/Room";
+import { Request, Response } from "express";
+import { PersistedRoom, RoomModel } from "../database-models/Room";
 import { CreateRoomZodSchema } from "../dto/CreateRoomDTO";
 import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
 import mongoose from "mongoose"
@@ -18,7 +19,7 @@ export async function createRoom(req, res) {
     const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse(req.user)
     const room: PersistedRoom = {
         ...createRoomDTO,
-        owner: new ObjectId(userCheckDTO.user),
+        owner: new ObjectId(userCheckDTO.id),
         campaigns: new DocumentArray([])
     }
     try {
@@ -29,13 +30,9 @@ export async function createRoom(req, res) {
     }
 }
 
-export async function getRooms(req, res) {
-    try {
-        const rooms = await RoomModel.find();
-        res.send(rooms);
-    } catch (err) {
-        res.status(400).send(err);
-    }
+export async function getRooms(req: Request, res: Response): Promise<void> {
+    const rooms = await RoomModel.find();
+    res.send(rooms);
 }
 
 export async function getRoom(req, res) {

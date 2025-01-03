@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Roll to Match: TTRPG Game Finder</title>
+</head>
+
+<body>
+    <h1>
+        <%= campaign.title %>
+    </h1>
+    <p>
+        <%= campaign.description %>
+    </p>
+
+    <%- include('partials/campaign-card-large',{campaign:campaign}) %>
+
+</body>
+
+<footer>
+
+</footer>
+
+</html>

@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
-import { PersistedReview } from "../database_models/Review"
-import { CampaignModel } from "../database_models/Campaign"
-import { UserModel } from "../database_models/User"
+import { PersistedReview } from "../database-models/Review"
+import { CampaignModel } from "../database-models/Campaign"
+import { UserModel } from "../database-models/User"
 import { CreateReviewDTO, CreateReviewZodSchema } from "../dto/CreateReviewDTO"
 import { UpdateReviewDTO, UpdateReviewZodSchema } from "../dto/UpdateReviewDTO"
 

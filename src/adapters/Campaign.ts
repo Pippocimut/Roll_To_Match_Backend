@@ -1,13 +1,30 @@
-import { PersistedCampaign } from "../database_models/Campaign";
-import { MongoDocument } from "../types";
+import { PersistedCampaign } from "../database-models/Campaign";
+import { MongoDocument } from "../data-types";
 
-function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<PersistedCampaign>): MongoDocument<PersistedCampaign> {
+export type AdaptedCampaign = {
+    id: string,
+    title: string,
+    description: string,
+    owner: string,
+    room: string,
+    location: {
+        type: string,
+        coordinates: number[]
+    },
+    tags: string[],
+    registeredAt: Date,
+    reviews: any[],
+    playerQueue: any[],
+    activePlayers: any[],
+}
+
+function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<PersistedCampaign>): AdaptedCampaign {
     return {
-        _id: persistedCampaign._id,
+        id: persistedCampaign._id.toString(),
         title: persistedCampaign.title,
         description: persistedCampaign.description,
-        owner: persistedCampaign.owner,
-        room: persistedCampaign.room,
+        owner: persistedCampaign.owner.toString(),
+        room: persistedCampaign.room.toString(),
         location: persistedCampaign.location,
         tags: persistedCampaign.tags,
         registeredAt: persistedCampaign.registeredAt,

@@ -6,6 +6,7 @@ import { CampaignService } from "../services/CampaignService";
 import CampaignAdapter from "../adapters/Campaign";
 import { Request, Response } from "express";
 import { CampaignCheckDTO, CampaignCheckZodSchema } from "../dto/CampaignCheckDTO";
+import { CampaignModel } from "@roll-to-match/models";
 
 export class CampaignController {
 
@@ -14,7 +15,7 @@ export class CampaignController {
 
     public static getInstance(): CampaignController {
         if (!CampaignController.instance) {
-            CampaignController.instance = new CampaignController(new CampaignService());
+            CampaignController.instance = new CampaignController(new CampaignService(CampaignModel));
         }
         return CampaignController.instance;
     }
@@ -35,24 +36,28 @@ export class CampaignController {
         }
     }
 
-    public async getCampaigns(req: Request & { user: string }, res: Response): Promise<void> {
+    public getCampaigns = async (req: Request & { user: string }, res: Response): Promise<void> => {
         const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
-        const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
+        //const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
 
         try {
-            const campaigns = await this.campaignService.getCampaigns(searchParamsDTO, userCheckDTO.id)
-            res.status(200).send(campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign));
+            const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
+            const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
+
+            console.log(adaptedCampaigns)
+
+            res.status(200).render('pages/index', { campaigns: adaptedCampaigns });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
     }
 
-    public async getCampaign(req: Request, res: Response): Promise<void> {
-        const campaignCheckDTO: CampaignCheckDTO = CampaignCheckZodSchema.parse(req.params)
-
+    public getCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
+            CampaignCheckZodSchema.parseAsync(req.params)
             const campaign = await this.campaignService.getCampaign(req.params.id)
-            res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign));
+            console.log(campaign)
+            res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign) });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
@@ -96,7 +101,8 @@ export class CampaignController {
         }
     }
 
-    private CampaignControllerHandleError(err: any, res: Response) {
+    private CampaignControllerHandleError = (err: Error, res: Response): void => {
+        console.error(err)
         switch (err.name) {
             case 'ValidationError':
                 res.status(400).send({ message: err.message })
@@ -108,6 +114,5 @@ export class CampaignController {
                 res.status(500).send({ message: 'Internal server error' })
                 break;
         }
-        console.error(err)
     }
 }

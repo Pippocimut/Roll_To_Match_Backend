@@ -1,17 +1,18 @@
 import { z } from 'zod'
-import { CampaignModel } from '../database_models/Campaign'
+import { CampaignModel } from '../database-models/Campaign'
 
 export const CampaignCheckZodSchema = z.object({
     id: z.string(),
 }).refine(data => {
     const getUser = CampaignModel.findById(data.id)
     if (!getUser) {
-        throw new Error('User does not exist')
+        return false
     }
+    return true
 }).transform(async (data) => {
     return {
         ...data,
-        campaign : await CampaignModel.findById(data.id)
+        campaign: await CampaignModel.findById(data.id)
     }
 })
 

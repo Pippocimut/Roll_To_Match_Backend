@@ -1,0 +1,17 @@
+<div id="campaign-card">
+    <form action="/campaign/<%= campaign.id %>/candidate" method="post">
+        <input type="hidden" name="campaignId" value="<%= campaign.id %>">
+        <h2>
+            <%= campaign.name %>
+        </h2>
+        <p>
+            Description <%= campaign.description %>
+        </p>
+        <p>
+            <% campaign.tags.forEach(tag=> { %>
+                <%= tag %>
+                    <% }) %>
+        </p>
+        <input type="submit" value="See Campaign">
+    </form>
+</div>

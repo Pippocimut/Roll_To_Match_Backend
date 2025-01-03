@@ -12,7 +12,7 @@ export default [
   {
     "overrides": [
       {
-        "files": ["tests/**/*"],
+        "files": ["__test__/**/*"],
         "env": {
           "jest": true
         }

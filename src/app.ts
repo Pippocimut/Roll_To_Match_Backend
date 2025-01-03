@@ -1,14 +1,17 @@
+import './register-paths';
 import mongoose from 'mongoose';
 import express from 'express';
+import path from 'path';
 import "dotenv/config";
 import { auth as onlyAuthorizedUsers } from './middlewares/authMiddleware';
 import indexRoutes from './routes/index';
-import path from 'path';
 
 const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
 
-const session = require('express-session');
+import session from 'express-session';
+import { cookie } from 'express-validator';
+import { fa } from '@faker-js/faker';
 const app = express();
 
 const MONGO_URL = process.env.MONGO_URL;
@@ -16,11 +19,13 @@ const PORT = process.env.PORT;
 
 app.use(express.json());
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: { secure: false }
 }));
 
 app.use(express.urlencoded({ extended: false }));
@@ -30,25 +35,24 @@ app.use((req, res, next) => {
     next();
 });
 
-app.post('/send-location', (req, res) => {
-    console.log(req.body);
-    console.log(req.body.lat);
-    res.send('Location received');
-});
-
-
+app.use('/', indexRoutes);
 app.use('/auth', authRouter);
-
-app.use(onlyAuthorizedUsers);
-app.use('/api',indexRoutes);
 
 app.use(errorRouter);
 
-mongoose.connect(MONGO_URL).then(() => {
+app.use(onlyAuthorizedUsers);
+app.get('/profile', (req, res) => {
+    res.json({ message: 'Welcome to your profile' });
+});
+
+mongoose.connect(process.env.BARE_MONGO_URL, {
+    user: process.env.MONGO_USER,
+    pass: process.env.MONGO_PASS,
+    dbName: process.env.DATABASE_NAME,
+}).then(() => {
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
     });
 }).catch((err) => {
     console.log(err);
 });
-

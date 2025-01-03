@@ -1,0 +1,32 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: pass
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  app:
+    build: .
+    container_name: app
+    environment:
+      PORT: 3000
+      BARE_MONGO_URL: mongodb://mongo:27017/
+      MONGO_USER: user
+      MONGO_PASS: pass
+      DATABASE_NAME: roll-to-match-test
+      TOKEN_SECRET: secret
+      CLIENT_ID: 819188550192-m6gc9vme12jlg05nlpp6fb1klc4bufge.apps.googleusercontent.com
+      CLIENT_SECRET: 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
+      SESSION_SECRET: secret
+    depends_on:
+      - mongo
+    ports:
+      - "80:3000"
+
+volumes:
+  mongo-data:

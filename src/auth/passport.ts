@@ -2,7 +2,7 @@ import "dotenv/config";
 import passport from "passport"
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
-import { FacebookUserModel, GoogleUserModel, UserModel } from '../database_models/User';
+import { FacebookUserModel, GoogleUserModel, UserModel } from '../database-models/User';
 
 passport.serializeUser(function (user, done) {
     done(null, user);
@@ -65,22 +65,20 @@ passport.use(new GoogleStrategy({
 },
     async function (accessToken, refreshToken, profile, cb) {
         try {
-            const user = await GoogleUserModel.findOne({ googleId: profile.id })
+            let user = await GoogleUserModel.findOne({ googleId: profile.id })
 
-            if (user) {
-                return cb(null, user);
-            }
-            else {
-                const createdUser = new GoogleUserModel({
+            if (!user) {
+                user = new GoogleUserModel({
                     username: profile.displayName,
                     slug: profile.displayName.trim().toLowerCase().replace(/ /g, '-'),
                     email: profile.emails[0].value,
                     date: Date.now(),
                     googleId: profile.id
                 });
-                await createdUser.save()
-                return cb(null, createdUser);
+                await user.save()
             }
+            return cb(null, user);
+
         } catch (err) {
             return cb(err, null);
         }

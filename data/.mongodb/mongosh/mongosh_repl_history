@@ -1,0 +1,7 @@
+})
+  roles: [{ role: "readWrite", db: "roll-to-match-test" }]
+  pwd: "pass",
+  user: "user",
+use admin
+db.createUser({ user: "user", pwd: "pass", roles: [{ role: "readWrite", db: "roll-to-match-test" }] })
+db.createUser({ user: "user", pwd: "pass", roles: [{ role: "readWrite", db: "roll-to-match-test" }] })

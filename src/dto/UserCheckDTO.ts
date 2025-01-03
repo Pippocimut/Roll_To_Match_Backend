@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { UserModel } from '../database_models/User'
+import { UserModel } from '../database-models/User'
 export const UserCheckZodSchema = z.object({
     id: z.string(),
 }).refine(data => {

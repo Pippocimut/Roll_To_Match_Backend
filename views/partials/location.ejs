@@ -1,0 +1,32 @@
+<script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOZA_T4M1m-jPGRqev61QMDtxOFZS6Blo&libraries=places&callback=initAutocomplete"
+    async defer>
+    </script>
+<form id="locationField" action="/send-location" method="post">
+    <p style="font-family: roboto, sans-serif">Search for a place here:</p>
+    <input id="autocomplete" name="address" placeholder="Enter a location" type="text"></input>
+    <input id="location" name="location" type="hidden"></input>
+    <input name="submit" type="submit" value="Submit"></input>
+</form>
+<script>
+    async function initAutocomplete() {
+        const input = document.getElementById('autocomplete');
+
+        const autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            const locationField = document.getElementById('location');
+            if (place.geometry) {
+                locationField.value = JSON.stringify({
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng(),
+                    address: place.formatted_address,
+                    placeId: place.place_id
+                });
+            }
+
+            console.log('Place:', place);
+        });
+    }
+    initAutocomplete();
+</script>

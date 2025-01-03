@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { CreateCampaignDTO, CreateCampaignZodSchema } from "../dto/CreateCampaignDTO";
 import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
-import { CampaignModel, PersistedCampaign } from "../database_models/Campaign";
-import { RoomModel } from "../database_models/Room";
-import { MongoDocument } from "../types";
+import { CampaignModel, PersistedCampaign } from "../database-models/Campaign";
+import { RoomModel } from "../database-models/Room";
+import { MongoDocument } from "../data-types";
 
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 

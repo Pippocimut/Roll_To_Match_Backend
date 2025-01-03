@@ -1,11 +1,12 @@
 import { z } from 'zod'
-import { RoomModel } from '../database_models/Room'
+import { RoomModel } from '../database-models/Room'
+import { CampaignTags } from '../data-types'
 
 export const CreateCampaignZodSchema = z.object({
     title: z.string(),
     description: z.string(),
     room: z.string(),
-    tags: z.array(z.string()).min(1),
+    tags: z.array(z.nativeEnum(CampaignTags)).min(1),
     location : z.object({
         lat: z.number(),
         lng: z.number()

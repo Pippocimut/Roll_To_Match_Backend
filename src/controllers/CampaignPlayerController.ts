@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { PersistedUser, UserModel } from '../database_models/User'
-import { MongoDocument } from '../types'
-import { PersistedPlayer } from '../database_models/Player'
-import { CampaignModel } from '../database_models/Campaign'
+import { PersistedUser, UserModel } from '../database-models/User'
+import { MongoDocument } from '../data-types'
+import { PersistedPlayer } from '../database-models/Player'
+import { CampaignModel } from '../database-models/Campaign'
 
 export class CampaignPlayerController {
     public static createPlayer = createPlayer

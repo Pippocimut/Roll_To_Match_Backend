@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { RoomModel } from '../database_models/Room'
+import { RoomModel } from '../database-models/Room'
 
 export const UpdateCampaignZodSchema = z.object({
     title: z.string(),

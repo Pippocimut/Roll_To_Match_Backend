@@ -1,9 +1,9 @@
-import { CampaignModel, PersistedCampaign } from "../database_models/Campaign";
+import { CampaignModel, PersistedCampaign } from "../database-models/Campaign";
 import { CreateCampaignDTO } from "../dto/CreateCampaignDTO";
 import { SearchCampaignDTO } from "../dto/SearchCampaignDTO";
 import { UpdateCampaignDTO } from "../dto/UpdateCampaignDTO";
 import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
-import { MongoDocument } from "../types";
+import { MongoDocument } from "../data-types";
 
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 
@@ -17,7 +17,11 @@ export interface ICampaignService {
 
 export class CampaignService implements ICampaignService {
 
-    public constructor() { }
+    private campaignModel: typeof CampaignModel;
+
+    public constructor(campaignModel: typeof CampaignModel) {
+        this.campaignModel = campaignModel;
+    }
 
     public async createCampaign(campaignDTO: CreateCampaignDTO, userCheckDTO: UserCheckDTO): Promise<MongoDocument<PersistedCampaign>> {
         const campaign: PersistedCampaign = {
@@ -36,7 +40,7 @@ export class CampaignService implements ICampaignService {
             activePlayers: new DocumentArray([]),
         }
 
-        const campaignCreated = await CampaignModel.create(campaign);
+        const campaignCreated = await this.campaignModel.create(campaign);
         return campaignCreated;
     }
 
@@ -81,8 +85,6 @@ export class CampaignService implements ICampaignService {
             }
         }
 
-        filter["true"] = true;
-
         if (Object.keys(filter).length > 0) {
             pipeline.push({ $match: filter })
         }
@@ -116,6 +118,9 @@ export class CampaignService implements ICampaignService {
 
     public async getCampaign(campaignId: string): Promise<MongoDocument<PersistedCampaign>> {
         const campaign = await CampaignModel.findById(campaignId);
+        if (!campaign || campaign === null) {
+            throw new Error('Campaign not found');
+        }
         return campaign;
     }
 
