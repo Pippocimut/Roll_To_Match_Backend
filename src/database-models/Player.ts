@@ -16,4 +16,6 @@ export const PlayerSchema = new mongoose.Schema({
     }
 });
 
+export const PlayerModel = mongoose.model('Player', PlayerSchema);
+
 export type PersistedPlayer = InferSchemaType<typeof PlayerSchema>;
