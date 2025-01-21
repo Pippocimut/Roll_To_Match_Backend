@@ -13,7 +13,39 @@
                     <% }) %>
         </p>
         <p>
-            <%= JSON.stringify(campaign) %>
+            <% campaign.playerQueue.forEach(player=> { %>
+                <%= JSON.stringify(player) %>
+                    <% if(userId.id.toString()===player.id.toString()) { %>
+                        <button id="remove-button">Remove</button>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const button = document.getElementById('remove-button')
+                                button.addEventListener('click', async (e) => {
+                                    e.preventDefault() // Impedisce l'invio del form
+                                    e.stopPropagation() // Ferma la propagazione dell'evento
+
+                                    try {
+                                        const result = await fetch('/campaign/<%= campaign.id %>/player/<%= player.id %>', {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            }
+                                        })
+
+                                        if (result.ok) {
+                                            // Opzionale: ricarica la pagina o aggiorna l'UI
+                                            window.location.reload()
+                                        } else {
+                                            console.error('Errore nella rimozione:', await result.text())
+                                        }
+                                    } catch (error) {
+                                        console.error('Errore nella richiesta:', error)
+                                    }
+                                })
+                            })
+                        </script>
+                        <% } %>
+                            <% }) %>
         </p>
         <input type="submit" value="See Campaign">
     </form>

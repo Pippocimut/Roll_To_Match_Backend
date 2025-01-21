@@ -83,17 +83,17 @@ async function getCandidatePlayer(req: Request, res: Response): Promise<void> {
     }
 }
 
-async function deleteCandidatePlayer(req: Request, res: Response): Promise<void> {
+async function deleteCandidatePlayer(req: Request & { user: any }, res: Response): Promise<void> {
     try {
         const { campaignId, playerId } = req.params
-        const userDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
+        const userDTO: UserCheckDTO = await UserCheckZodSchema.parseAsync({ id: req.user.id })
 
         const campaign = await CampaignModel.findById(campaignId)
         if (!campaign) {
             throw new Error('Campaign not found')
         }
 
-        if (campaign.owner.toString() !== userDTO.id || userDTO.id !== playerId) {
+        if (campaign.owner.toString() !== userDTO.id.toString() && userDTO.id.toString() !== playerId) {
             throw new Error('Unauthorized')
         }
 
@@ -102,7 +102,7 @@ async function deleteCandidatePlayer(req: Request, res: Response): Promise<void>
             throw new Error('Player not found')
         }
 
-        campaign.activePlayers.splice(playerIndex, 1)
+        campaign.playerQueue.splice(playerIndex, 1)
 
         await campaign.save()
         res.json({ message: 'Player removed' })

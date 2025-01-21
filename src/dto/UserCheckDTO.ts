@@ -4,7 +4,6 @@ export const UserCheckZodSchema = z.object({
     id: z.string(),
 }).refine(async data => {
     const getUser = await UserModel.findById(data.id.toString())
-    console.log(getUser)
     if (!getUser) {
         return false
     }
@@ -12,7 +11,7 @@ export const UserCheckZodSchema = z.object({
 }, "User does not exist").transform(async (data) => {
     return {
         ...data,
-        user: await UserModel.findById(data.id)
+        user: await UserModel.findById(data.id.toString())
     }
 })
 

@@ -38,14 +38,12 @@ export class CampaignController {
 
     public getCampaigns = async (req: Request & { user: string }, res: Response): Promise<void> => {
         const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
-        //const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
 
         try {
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-
-
-            res.status(200).render('pages/index', { campaigns: adaptedCampaigns });
+            console.log(req.user)
+            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: req.user });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
@@ -55,7 +53,7 @@ export class CampaignController {
         try {
             CampaignCheckZodSchema.parseAsync(req.params)
             const campaign = await this.campaignService.getCampaign(req.params.id)
-            res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign) });
+            res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign), userId: req.user });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
