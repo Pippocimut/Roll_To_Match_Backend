@@ -68,6 +68,12 @@ passport.use(new GoogleStrategy({
             let user = await GoogleUserModel.findOne({ googleId: profile.id })
 
             if (!user) {
+                let hasDuplicateSlugOrUsername = await UserModel.findOne({ $or: [{ slug: profile.displayName.trim().toLowerCase().replace(/ /g, '-') }, { username: profile.displayName }] })
+                while (hasDuplicateSlugOrUsername) {
+                    profile.displayName += `-${Math.floor(Math.random() * 1000)}`
+                    hasDuplicateSlugOrUsername = await UserModel.findOne({ $or: [{ slug: profile.displayName.trim().toLowerCase().replace(/ /g, '-') }, { username: profile.displayName }] })
+                }
+                console.log(profile.displayName)
                 user = new GoogleUserModel({
                     username: profile.displayName,
                     slug: profile.displayName.trim().toLowerCase().replace(/ /g, '-'),

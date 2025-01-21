@@ -10,11 +10,8 @@ const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
 
 import session from 'express-session';
-import { cookie } from 'express-validator';
-import { fa } from '@faker-js/faker';
 const app = express();
 
-const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT;
 
 app.use(express.json());
@@ -35,15 +32,12 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/', indexRoutes);
+
 app.use('/auth', authRouter);
 
-app.use(errorRouter);
-
 app.use(onlyAuthorizedUsers);
-app.get('/profile', (req, res) => {
-    res.json({ message: 'Welcome to your profile' });
-});
+app.use('/', indexRoutes);
+app.use(errorRouter);
 
 mongoose.connect(process.env.BARE_MONGO_URL, {
     user: process.env.MONGO_USER,

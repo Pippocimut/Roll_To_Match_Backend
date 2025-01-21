@@ -22,6 +22,12 @@ async function registerLocalUser(req: Request & { session: any }, res: Response)
         const salt = await bcryptjs.genSalt(5)
         const hashedPassword = await bcryptjs.hash(registerLocalUserDTO.password, salt)
 
+        let hasDuplicateSlugOrUsername = await LocalUserModel.findOne({ $or: [{ slug: registerLocalUserDTO.slug }, { username: registerLocalUserDTO.username }] })
+        while (hasDuplicateSlugOrUsername) {
+            registerLocalUserDTO.slug += `-${Math.floor(Math.random() * 1000)}`
+            hasDuplicateSlugOrUsername = await LocalUserModel.findOne({ $or: [{ slug: registerLocalUserDTO.slug }, { username: registerLocalUserDTO.username }] })
+        }
+
         const persistedUser: PersistedLocalUser = {
             username: registerLocalUserDTO.username,
             email: registerLocalUserDTO.email,

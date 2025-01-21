@@ -20,7 +20,7 @@ export async function createRoom(req, res) {
     const room: PersistedRoom = {
         ...createRoomDTO,
         owner: new ObjectId(userCheckDTO.id),
-        campaigns: new DocumentArray([])
+        campaigns: []
     }
     try {
         const createdRoom = await RoomModel.create(room);

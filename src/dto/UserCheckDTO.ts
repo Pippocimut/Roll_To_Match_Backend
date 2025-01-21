@@ -2,15 +2,17 @@ import { z } from 'zod'
 import { UserModel } from '../database-models/User'
 export const UserCheckZodSchema = z.object({
     id: z.string(),
-}).refine(data => {
-    const getUser = UserModel.findById(data.id)
+}).refine(async data => {
+    const getUser = await UserModel.findById(data.id.toString())
+    console.log(getUser)
     if (!getUser) {
-        throw new Error('User does not exist')
+        return false
     }
-}).transform(async (data) => {
+    return true
+}, "User does not exist").transform(async (data) => {
     return {
         ...data,
-        user : await UserModel.findById(data.id)
+        user: await UserModel.findById(data.id)
     }
 })
 

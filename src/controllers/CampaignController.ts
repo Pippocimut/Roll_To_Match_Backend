@@ -44,7 +44,6 @@ export class CampaignController {
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
 
-            console.log(adaptedCampaigns)
 
             res.status(200).render('pages/index', { campaigns: adaptedCampaigns });
         } catch (err) {
@@ -56,7 +55,6 @@ export class CampaignController {
         try {
             CampaignCheckZodSchema.parseAsync(req.params)
             const campaign = await this.campaignService.getCampaign(req.params.id)
-            console.log(campaign)
             res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign) });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)

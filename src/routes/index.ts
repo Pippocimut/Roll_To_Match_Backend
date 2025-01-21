@@ -26,20 +26,20 @@ router.get('/room/:id/campaigns', RoomCampaignController.getCampaigns);
 router.put('/campaign/:id', CampaignController.getInstance().updateCampaign);
 router.delete('/campaign/:id', CampaignController.getInstance().deleteCampaign);
 
-router.post('campaign/:id/review', ReviewController.createReview);
-router.get('campaign/:id/reviews', ReviewController.getReviews);
-router.get('campaign/:id/review/:id', ReviewController.getReview);
-router.put('campaign/:id/review/:id', ReviewController.updateReview);
-router.delete('campaign/:id/review/:id', ReviewController.deleteReview);
+router.post('/campaign/:id/review', ReviewController.createReview);
+router.get('/campaign/:id/reviews', ReviewController.getReviews);
+router.get('/campaign/:id/review/:id', ReviewController.getReview);
+router.put('/campaign/:id/review/:id', ReviewController.updateReview);
+router.delete('/campaign/:id/review/:id', ReviewController.deleteReview);
 
-router.post('campaign/:campaignId/candidate', CampaignCandidatePlayerController.createCandidatePlayer);
-router.get('campaign/:campaignId/candidate', CampaignCandidatePlayerController.getCandidatePlayers);
-router.get('campaign/:campaignId/player/:candidate', CampaignCandidatePlayerController.getCandidatePlayer);
-router.delete('campaign/:campaignId/player/:candidate', CampaignCandidatePlayerController.deleteCandidatePlayer);
+router.post('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getInstance().createCandidatePlayer);
+router.get('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getCandidatePlayers);
+router.get('/campaign/:campaignId/player/:candidate', CampaignCandidatePlayerController.getCandidatePlayer);
+router.delete('/campaign/:campaignId/player/:candidate', CampaignCandidatePlayerController.deleteCandidatePlayer);
 
-router.post('campaign/:campaignId/player', CampaignPlayerController.createPlayer);
-router.get('campaign/:campaignId/players', CampaignPlayerController.getPlayers);
-router.get('campaign/:campaignId/player/:playerId', CampaignPlayerController.getPlayer);
-router.delete('campaign/:campaignId/player/:playerId', CampaignPlayerController.deletePlayer);
+router.post('/campaign/:campaignId/player', CampaignPlayerController.createPlayer);
+router.get('/campaign/:campaignId/players', CampaignPlayerController.getPlayers);
+router.get('/campaign/:campaignId/player/:playerId', CampaignPlayerController.getPlayer);
+router.delete('/campaign/:campaignId/player/:playerId', CampaignPlayerController.deletePlayer);
 
 export default router;

@@ -4,8 +4,9 @@
   "description": "A project for my cloud computing class of 2024 in JS",
   "main": "built/app.js",
   "scripts": {
-    "start": "docker image  build -t roll-to-match:1 . && docker container run -d --name roll-to-match --publish 80:3000 roll-to-match:1",
-    "restart": "docker container stop Staging && docker container rm Staging && docker image  build -t roll-to-match:1 . && docker container run -d --name Staging --publish 80:3000 roll-to-match:1",
+    "start": "tsc --build && tailwindcss -i ./views/css/input.css -o ./views/css/output.css && nodemon built/app.js",
+    "start-docker": "docker image  build -t roll-to-match:1 . && docker container run -d --name roll-to-match --publish 80:3000 roll-to-match:1",
+    "restart-docker": "docker container stop Staging && docker container rm Staging && docker image  build -t roll-to-match:1 . && docker container run -d --name Staging --publish 80:3000 roll-to-match:1",
     "build": "tsc --build",
     "database": "ts-node ./src/testing/jobs/main.ts",
     "test": "jest"
@@ -55,7 +56,7 @@
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-jest": "^0.0.1",
-    "typescript": "^5.7.2",
+    "typescript": "^5.7.3",
     "typescript-eslint": "^8.18.2"
   }
 }

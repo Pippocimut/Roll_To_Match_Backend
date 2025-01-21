@@ -130,4 +130,10 @@ dist
 .pnp.*
 data/
 db_data/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
+built/

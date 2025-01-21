@@ -1,4 +1,4 @@
-/* import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { PersistedUser, UserModel } from '../database-models/User'
 import { MongoDocument } from '../data-types'
 import { PersistedPlayer } from '../database-models/Player'
@@ -6,6 +6,8 @@ import { CampaignModel } from '../database-models/Campaign'
 import { UserCheckDTO, UserCheckZodSchema } from 'dto/UserCheckDTO'
 import { CampaignService } from 'services/CampaignService'
 import { CandidateService } from 'services/CandidateService'
+import { CreateCandidateDTO } from 'dto/CreateCandidateDTO'
+import { CreateCandidateZodSchema } from 'dto/CreateCandidateDTO'
 
 export class CampaignCandidatePlayerController {
     private static instance: CampaignCandidatePlayerController;
@@ -19,62 +21,34 @@ export class CampaignCandidatePlayerController {
 
     public static getInstance(): CampaignCandidatePlayerController {
         if (!CampaignCandidatePlayerController.instance) {
-            CampaignCandidatePlayerController.instance = new CampaignCandidatePlayerController(new CampaignService(CampaignModel), new CandidateService(UserModel));
+            CampaignCandidatePlayerController.instance = new CampaignCandidatePlayerController(new CampaignService(CampaignModel), new CandidateService(CampaignModel));
         }
         return CampaignCandidatePlayerController.instance;
     }
-    public static createCandidatePlayer = (req: Request, res: Response): Promise<void> {
+    public createCandidatePlayer = async (req: Request & { user: any }, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { campaignId } = req.params
-            const userDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
+            const userId = req.user.id
+            const userDTO: UserCheckDTO = await UserCheckZodSchema.parseAsync({ id: userId })
 
-            const campaign = await CampaignModel.findById(campaignId)
-            if (!campaign) {
-                throw new Error('Campaign not found')
-            }
-
-            const player: PersistedPlayer = {
-                id: userDTO.user._id,
+            const candidateDTO: CreateCandidateDTO = CreateCandidateZodSchema.parse({
+                email: userDTO.user.email,
                 slug: userDTO.user.slug,
-                email: userDTO.user.email
-            }
+                id: userDTO.id
+            })
 
-            campaign.playerQueue.push(player)
+            const campaign = await this.campaignService.getCampaign(campaignId)
+            const player = await this.candidateService.createCandidate(campaign._id.toString(), candidateDTO)
 
-            await campaign.save()
-            res.status(201).json(player)
+            res.status(201).redirect(`/campaign/${campaignId}`)
         } catch (error) {
-            res.status(500).json({ error: error.message })
+            return next(error)
         }
     }
+
     public static getCandidatePlayers = getCandidatePlayers
     public static getCandidatePlayer = getCandidatePlayer
     public static deleteCandidatePlayer = deleteCandidatePlayer
-}
-
-async function createCandidatePlayer(req: Request, res: Response): Promise<void> {
-    try {
-        const { campaignId } = req.params
-        const userDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
-
-        const campaign = await CampaignModel.findById(campaignId)
-        if (!campaign) {
-            throw new Error('Campaign not found')
-        }
-
-        const player: PersistedPlayer = {
-            id: userDTO.user._id,
-            slug: userDTO.user.slug,
-            email: userDTO.user.email
-        }
-
-        campaign.playerQueue.push(player)
-
-        await campaign.save()
-        res.status(201).json(player)
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
 }
 
 async function getCandidatePlayers(req: Request, res: Response): Promise<void> {
@@ -135,4 +109,4 @@ async function deleteCandidatePlayer(req: Request, res: Response): Promise<void>
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
-} */
+} 
