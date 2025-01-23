@@ -22,7 +22,7 @@ export class CampaignController {
         this.campaignService = campaignService;
     }
 
-    public async createCampaign(req: Request & { user: string }, res: Response): Promise<void> {
+    public async createCampaign(req: Request, res: Response): Promise<void> {
         const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
 
         try {
@@ -48,6 +48,7 @@ export class CampaignController {
     public getCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
             const campaign = await this.campaignService.getCampaign(req.params.id)
+            console.log(JSON.stringify(campaign))
             res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign), userId: req.userId });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
@@ -99,7 +100,7 @@ export class CampaignController {
             case 'ValidationError':
                 res.status(400).send({ message: err.message })
                 break;
-            case 'AuthorizationError':
+            case 'UnauthorizedError':
                 res.status(401).send({ message: err.message })
                 break;
             default:

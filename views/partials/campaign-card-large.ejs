@@ -12,10 +12,15 @@
                 <%= tag %>
                     <% }) %>
         </p>
-        <p>
+        <ul>
             <% campaign.playerQueue.forEach(player=> { %>
-                <%= JSON.stringify(player) %>
-                    <% if(userId.id.toString()===player.id.toString()) { %>
+                <li>
+                    <%= player.slug %>
+                    <%= player.email %>
+                    <%= player.id %>
+                    <%= player.username %>
+                    <%= JSON.stringify(player) %>
+                    <% if(userId.toString()===player.id.toString()) { %>
                         <button id="remove-button">Remove</button>
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
@@ -45,8 +50,41 @@
                             })
                         </script>
                         <% } %>
-                            <% }) %>
-        </p>
-        <input type="submit" value="See Campaign">
+                </li>
+                <% }) %>
+        </ul>
+        <ul>
+            <% campaign.activePlayers.forEach(player=> { %>
+                <li>
+                    <%= player.slug %>
+                    <%= player.email %>
+                    <%= player.id %>
+                    <%= player.username %>
+                    <button id="remove-button">Remove</button>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const button = document.getElementById('remove-button')
+                            button.addEventListener('click', async (e) => {
+                                e.preventDefault() // Impedisce l'invio del form
+                                e.stopPropagation() // Ferma la propagazione dell'evento
+
+                                try {
+                                    const result = await fetch('/campaign/<%= campaign.id %>/player/<%= player.id %>', {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        }
+                                    })
+                                } catch (error) {
+                                    console.error('Errore nella richiesta:', error)
+                                }
+                            })
+                        })
+                    </script>
+                </li>
+                <% }) %>
+        </ul>
+
+        <input type="submit" value="Join Campaign">
     </form>
 </div>

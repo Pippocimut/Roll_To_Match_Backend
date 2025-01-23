@@ -35,7 +35,7 @@ router.delete('/campaign/:id/review/:id', ReviewController.deleteReview);
 router.post('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getInstance().createCandidatePlayer);
 router.get('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getCandidatePlayers);
 router.get('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getCandidatePlayer);
-router.delete('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.deleteCandidatePlayer);
+router.delete('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getInstance().deleteCandidatePlayer);
 
 router.post('/campaign/:campaignId/player', CampaignPlayerController.createPlayer);
 router.get('/campaign/:campaignId/players', CampaignPlayerController.getPlayers);

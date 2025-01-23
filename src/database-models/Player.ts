@@ -13,6 +13,10 @@ export const PlayerSchema = new mongoose.Schema({
     email: {
         type: String,
         required: false
+    },
+    username: {
+        type: String,
+        required: false
     }
 });
 

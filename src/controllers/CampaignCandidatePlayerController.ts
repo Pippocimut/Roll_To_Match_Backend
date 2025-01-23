@@ -22,7 +22,7 @@ export class CampaignCandidatePlayerController {
         }
         return CampaignCandidatePlayerController.instance;
     }
-    public createCandidatePlayer = async (req: Request & { user: any }, res: Response, next: NextFunction): Promise<void> => {
+    public createCandidatePlayer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { campaignId } = req.params
             const userId = req.userId
@@ -35,7 +35,8 @@ export class CampaignCandidatePlayerController {
             const candidateDTO: CreateCandidateDTO = CreateCandidateZodSchema.parse({
                 email: user.email,
                 slug: user.slug,
-                id: user._id.toString()
+                id: user._id.toString(),
+                username: user.username
             })
 
             const campaign = await this.campaignService.getCampaign(campaignId)
@@ -49,7 +50,30 @@ export class CampaignCandidatePlayerController {
 
     public static getCandidatePlayers = getCandidatePlayers
     public static getCandidatePlayer = getCandidatePlayer
-    public static deleteCandidatePlayer = deleteCandidatePlayer
+    public deleteCandidatePlayer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { campaignId, playerId } = req.params
+            const userId = req.userId
+            const campaign = await CampaignModel.findById(campaignId)
+            if (!campaign) {
+                throw new Error('Campaign not found')
+            }
+
+            const isPlayerOwner = campaign.owner.toString() === userId.toString()
+            const isPlayerInQueue = campaign.playerQueue.find(player => player.id.toString() === playerId)
+            const isPlayerActive = campaign.activePlayers.find(player => player.id.toString() === playerId)
+    
+            if (!isPlayerOwner && !isPlayerActive && !isPlayerInQueue) {
+                throw new Error('Unauthorized')
+            }
+    
+            const candidate = await this.candidateService.deleteCandidate(campaignId, playerId)
+            
+            res.json({ message: 'Player removed' })
+        } catch (error) {
+            res.status(500).json({ error: error.message })
+        }
+    } 
 }
 
 async function getCandidatePlayers(req: Request, res: Response): Promise<void> {
@@ -83,30 +107,3 @@ async function getCandidatePlayer(req: Request, res: Response): Promise<void> {
         res.status(500).json({ error: error.message })
     }
 }
-
-async function deleteCandidatePlayer(req: Request & { user: any }, res: Response): Promise<void> {
-    try {
-        const { campaignId, playerId } = req.params
-        const userId = req.userId
-        const campaign = await CampaignModel.findById(campaignId)
-        if (!campaign) {
-            throw new Error('Campaign not found')
-        }
-
-        if (campaign.owner.toString() !== userId.toString()) {
-            throw new Error('Unauthorized')
-        }
-
-        const playerIndex = campaign.playerQueue.findIndex(player => player.id.toString() === playerId)
-        if (playerIndex === -1) {
-            throw new Error('Player not found')
-        }
-
-        campaign.playerQueue.splice(playerIndex, 1)
-
-        await campaign.save()
-        res.json({ message: 'Player removed' })
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
-} 
