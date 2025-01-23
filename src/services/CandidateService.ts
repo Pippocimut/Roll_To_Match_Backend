@@ -1,8 +1,4 @@
 import { CampaignModel, PersistedCampaign } from "../database-models/Campaign";
-import { CreateCampaignDTO } from "../dto/CreateCampaignDTO";
-import { SearchCampaignDTO } from "../dto/SearchCampaignDTO";
-import { UpdateCampaignDTO } from "../dto/UpdateCampaignDTO";
-import { UserCheckDTO } from "../dto/UserCheckDTO";
 import { MongoDocument } from "../data-types";
 import { PersistedPlayer } from "database-models/Player";
 import { CreateCandidateDTO } from "dto/CreateCandidateDTO";
@@ -11,17 +7,13 @@ import { UpdateWriteOpResult } from "mongoose";
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 
 export interface ICandidateService {
-    createCandidate(candidate: CreateCampaignDTO, user: UserCheckDTO): Promise<MongoDocument<PersistedCampaign>>;
-    getCandidates(searchParams: SearchCampaignDTO): Promise<MongoDocument<PersistedCampaign>[]>;
-    getCandidate(candidateId: string): Promise<MongoDocument<PersistedCampaign>>;
-    updateCandidate(candidateId: string, candidate: UpdateCampaignDTO): Promise<MongoDocument<PersistedCampaign>>;
-    deleteCandidate(candidateId: string): Promise<MongoDocument<PersistedCampaign>>;
+    createCandidate(campaignId: string, candidate: CreateCandidateDTO): Promise<UpdateWriteOpResult>;
 }
 
-export class CandidateService {
+export class CandidateService implements ICandidateService {
     constructor(private campaignModel: typeof CampaignModel) { }
 
-    public async createCandidate(campaignId: string, candidate: CreateCandidateDTO): Promise<UpdateWriteOpResult | null> {
+    public async createCandidate(campaignId: string, candidate: CreateCandidateDTO): Promise<UpdateWriteOpResult> {
         const player: PersistedPlayer = {
             id: new ObjectId(candidate.id),
             slug: candidate.slug,
@@ -34,7 +26,7 @@ export class CandidateService {
         }
 
         if (campaign.playerQueue.some((player) => player.id.toString() === candidate.id.toString())) {
-            return null
+            throw new Error('Candidate already exists');
         }
 
         const newCandidate = await this.campaignModel.updateOne({
@@ -42,7 +34,7 @@ export class CandidateService {
         }, {
             $push: { playerQueue: player }
         }).exec();
-
+        
         return newCandidate
     }
 }

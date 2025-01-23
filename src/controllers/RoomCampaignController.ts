@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { CreateCampaignDTO, CreateCampaignZodSchema } from "../dto/CreateCampaignDTO";
-import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
 import { CampaignModel, PersistedCampaign } from "../database-models/Campaign";
 import { RoomModel } from "../database-models/Room";
 import { MongoDocument } from "../data-types";
@@ -18,11 +17,10 @@ async function createCampaign(req: Request & { user: string }, res: Response): P
         throw new Error('Room does not exist')
     }
     const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
-    const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse(req.user)
     const campaign: PersistedCampaign = {
         title: campaignDTO.title,
         description: campaignDTO.description,
-        owner: new ObjectId(userCheckDTO.user),
+        owner: new ObjectId(req.userId),
         room: new ObjectId(campaignDTO.room),
         tags: campaignDTO.tags,
         registeredAt: new Date(),

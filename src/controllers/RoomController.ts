@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { PersistedRoom, RoomModel } from "../database-models/Room";
 import { CreateRoomZodSchema } from "../dto/CreateRoomDTO";
-import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
 import mongoose from "mongoose"
 const { ObjectId, DocumentArray } = mongoose.Types;
 
@@ -16,10 +15,9 @@ export class RoomController {
 
 export async function createRoom(req, res) {
     const createRoomDTO = CreateRoomZodSchema.parse(req.body);
-    const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse(req.user)
     const room: PersistedRoom = {
         ...createRoomDTO,
-        owner: new ObjectId(userCheckDTO.id),
+        owner: new ObjectId(req.userId),
         campaigns: []
     }
     try {
@@ -54,7 +52,7 @@ export async function deleteRoom(req, res) {
     if (!getRoom) {
         return res.status(400).send({ message: 'Room does not exist' })
     }
-    if (getRoom.owner.toString() !== req.user.user) {
+    if (getRoom.owner.toString() !== req.userId.toString()) {
         return res.status(401).send({ message: 'Unauthorized' })
     }
     if (getRoom.campaigns.length > 0) {

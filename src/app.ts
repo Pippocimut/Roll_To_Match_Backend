@@ -8,7 +8,6 @@ import indexRoutes from './routes/index';
 
 const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
-
 import session from 'express-session';
 const app = express();
 

@@ -15,7 +15,7 @@ export class ReviewController {
 
 async function createReview(req: Request & { user: string }, res: Response): Promise<void> {
     const campaignId = req.params.campaignId
-    const userId = req.user;
+    const userId = req.userId;
     const createReviewDTO: CreateReviewDTO = CreateReviewZodSchema.parse(req.body)
     const { title, message, stars } = createReviewDTO
 
@@ -66,7 +66,7 @@ async function getReview(req: Request & { user: string }, res: Response): Promis
 async function updateReview(req: Request & { user: string }, res: Response): Promise<void> {
     const reviewId = req.params.reviewId
     const campaignId = req.params.campaignId
-    const userId = req.user
+    const userId = req.userId
     const updateReviewDTO: UpdateReviewDTO = UpdateReviewZodSchema.parse(req.body)
     const { title, message, stars } = updateReviewDTO
 
@@ -100,7 +100,7 @@ async function updateReview(req: Request & { user: string }, res: Response): Pro
 async function deleteReview(req: Request & { user: string }, res: Response): Promise<void> {
     const reviewId = req.params.reviewId
     const campaignId = req.params.campaignId
-    const userId = req.user
+    const userId = req.userId
 
     const campaign = await CampaignModel.findById(campaignId)
     if (!campaign) {

@@ -1,9 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
-import { PersistedUser, UserModel } from '../database-models/User'
-import { MongoDocument } from '../data-types'
-import { PersistedPlayer } from '../database-models/Player'
+import { UserModel } from '../database-models/User'
 import { CampaignModel } from '../database-models/Campaign'
-import { UserCheckDTO, UserCheckZodSchema } from 'dto/UserCheckDTO'
 import { CampaignService } from 'services/CampaignService'
 import { CandidateService } from 'services/CandidateService'
 import { CreateCandidateDTO } from 'dto/CreateCandidateDTO'
@@ -28,13 +25,17 @@ export class CampaignCandidatePlayerController {
     public createCandidatePlayer = async (req: Request & { user: any }, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { campaignId } = req.params
-            const userId = req.user.id
-            const userDTO: UserCheckDTO = await UserCheckZodSchema.parseAsync({ id: userId })
+            const userId = req.userId
+
+            const user = await UserModel.findById(userId)
+            if (!user) {
+                throw new Error('User not found')
+            }
 
             const candidateDTO: CreateCandidateDTO = CreateCandidateZodSchema.parse({
-                email: userDTO.user.email,
-                slug: userDTO.user.slug,
-                id: userDTO.id
+                email: user.email,
+                slug: user.slug,
+                id: user._id.toString()
             })
 
             const campaign = await this.campaignService.getCampaign(campaignId)
@@ -86,14 +87,13 @@ async function getCandidatePlayer(req: Request, res: Response): Promise<void> {
 async function deleteCandidatePlayer(req: Request & { user: any }, res: Response): Promise<void> {
     try {
         const { campaignId, playerId } = req.params
-        const userDTO: UserCheckDTO = await UserCheckZodSchema.parseAsync({ id: req.user.id })
-
+        const userId = req.userId
         const campaign = await CampaignModel.findById(campaignId)
         if (!campaign) {
             throw new Error('Campaign not found')
         }
 
-        if (campaign.owner.toString() !== userDTO.id.toString() && userDTO.id.toString() !== playerId) {
+        if (campaign.owner.toString() !== userId.toString()) {
             throw new Error('Unauthorized')
         }
 

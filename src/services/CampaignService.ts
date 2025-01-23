@@ -2,13 +2,12 @@ import { CampaignModel, PersistedCampaign } from "../database-models/Campaign";
 import { CreateCampaignDTO } from "../dto/CreateCampaignDTO";
 import { SearchCampaignDTO } from "../dto/SearchCampaignDTO";
 import { UpdateCampaignDTO } from "../dto/UpdateCampaignDTO";
-import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
 import { MongoDocument } from "../data-types";
 
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 
 export interface ICampaignService {
-    createCampaign(campaignDTO: CreateCampaignDTO, user: UserCheckDTO): Promise<MongoDocument<PersistedCampaign>>;
+    createCampaign(campaignDTO: CreateCampaignDTO, ownerId: string): Promise<MongoDocument<PersistedCampaign>>;
     getCampaigns(searchParamsDTO: SearchCampaignDTO): Promise<MongoDocument<PersistedCampaign>[]>;
     getCampaign(campaignId: string): Promise<MongoDocument<PersistedCampaign>>
     updateCampaign(campaignId: string, campaignDTO: UpdateCampaignDTO): Promise<MongoDocument<PersistedCampaign>>
@@ -23,11 +22,11 @@ export class CampaignService implements ICampaignService {
         this.campaignModel = campaignModel;
     }
 
-    public async createCampaign(campaignDTO: CreateCampaignDTO, userCheckDTO: UserCheckDTO): Promise<MongoDocument<PersistedCampaign>> {
+    public async createCampaign(campaignDTO: CreateCampaignDTO, ownerId: string): Promise<MongoDocument<PersistedCampaign>> {
         const campaign: PersistedCampaign = {
             title: campaignDTO.title,
             description: campaignDTO.description,
-            owner: new ObjectId(userCheckDTO.id),
+            owner: new ObjectId(ownerId),
             room: new ObjectId(campaignDTO.room),
             location: {
                 type: "Point",

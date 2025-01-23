@@ -1,12 +1,10 @@
 import { CreateCampaignDTO, CreateCampaignZodSchema } from "../dto/CreateCampaignDTO";
 import { UpdateCampaignDTO, UpdateCampaignZodSchema } from "../dto/UpdateCampaignDTO";
-import { UserCheckDTO, UserCheckZodSchema } from "../dto/UserCheckDTO";
 import { SearchCampaignDTO, SearchCampaignZodSchema } from "../dto/SearchCampaignDTO";
 import { CampaignService } from "../services/CampaignService";
 import CampaignAdapter from "../adapters/Campaign";
 import { Request, Response } from "express";
-import { CampaignCheckDTO, CampaignCheckZodSchema } from "../dto/CampaignCheckDTO";
-import { CampaignModel } from "@roll-to-match/models";
+import { CampaignModel, UserModel } from "@roll-to-match/models";
 
 export class CampaignController {
 
@@ -24,26 +22,24 @@ export class CampaignController {
         this.campaignService = campaignService;
     }
 
-    public async createCampaign(req: Request, res: Response): Promise<void> {
+    public async createCampaign(req: Request & { user: string }, res: Response): Promise<void> {
         const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
-        const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
 
         try {
-            const campaign = await this.campaignService.createCampaign(campaignDTO, userCheckDTO)
+            const campaign = await this.campaignService.createCampaign(campaignDTO, req.userId)
             res.status(201).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign));
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
     }
 
-    public getCampaigns = async (req: Request & { user: string }, res: Response): Promise<void> => {
+    public getCampaigns = async (req: Request, res: Response): Promise<void> => {
         const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
 
         try {
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            console.log(req.user)
-            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: req.user });
+            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: req.userId });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
@@ -51,27 +47,27 @@ export class CampaignController {
 
     public getCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
-            CampaignCheckZodSchema.parseAsync(req.params)
             const campaign = await this.campaignService.getCampaign(req.params.id)
-            res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign), userId: req.user });
+            res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign), userId: req.userId });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
     }
 
     public async updateCampaign(req: Request, res: Response): Promise<void> {
-        const updateCampaignDTO: UpdateCampaignDTO = UpdateCampaignZodSchema.parse(req.body)
-        const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
-        const campaignCheckDTO: CampaignCheckDTO = CampaignCheckZodSchema.parse(req.params)
-
-        if (campaignCheckDTO.campaign.owner && campaignCheckDTO.campaign.owner.toString() !== userCheckDTO.id) {
-            res.status(401).send({ message: 'Unauthorized' })
-            return
-        }
-
         try {
-            const campaign = await this.campaignService.updateCampaign(req.params.id, updateCampaignDTO)
-            res.status(200).send(campaign);
+            const updateCampaignDTO: UpdateCampaignDTO = UpdateCampaignZodSchema.parse(req.body)
+
+            const campaign = await this.campaignService.getCampaign(req.params.id)
+            const user = await UserModel.findById(req.userId)
+
+            if (campaign.owner && campaign.owner.toString() !== user.id) {
+                res.status(401).send({ message: 'Unauthorized' })
+                return
+            }
+
+            const campaignUpdateResult = await this.campaignService.updateCampaign(req.params.id, updateCampaignDTO)
+            res.status(200).send(campaignUpdateResult);
         }
         catch (err) {
             this.CampaignControllerHandleError(err, res)
@@ -80,17 +76,17 @@ export class CampaignController {
 
 
     public async deleteCampaign(req: Request, res: Response): Promise<void> {
-        const userCheckDTO: UserCheckDTO = UserCheckZodSchema.parse({ id: req.user })
-        const campaignCheckDTO: CampaignCheckDTO = CampaignCheckZodSchema.parse(req.params)
-
-        if (campaignCheckDTO.campaign.owner && campaignCheckDTO.campaign.owner.toString() !== userCheckDTO.id) {
-            res.status(401).send({ message: 'Unauthorized' })
-            return
-        }
-
         try {
-            const campaign = await this.campaignService.deleteCampaign(req.params.id)
-            res.status(200).send(campaign);
+            const campaign = await this.campaignService.getCampaign(req.params.id)
+            const user = await UserModel.findById(req.userId)
+
+            if (campaign.owner && campaign.owner.toString() !== user.id) {
+                res.status(401).send({ message: 'Unauthorized' })
+                return
+            }
+
+            const campaignUpdateResult = await this.campaignService.deleteCampaign(req.params.id)
+            res.status(200).send(campaignUpdateResult);
         }
         catch (err) {
             this.CampaignControllerHandleError(err, res)

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { SearchCampaignDTO, UpdateCampaignDTO, UserCheckDTO } from "@roll-to-match/dto";
+import { SearchCampaignDTO, UpdateCampaignDTO } from "@roll-to-match/dto";
 import { RoomModel, UserModel, CampaignModel } from "@roll-to-match/models";
 import { CampaignService } from "@roll-to-match/services";
 import { CampaignTags } from "@roll-to-match/types";
@@ -32,7 +32,7 @@ describe('CampaignService', () => {
 
                     const campaignsInRoom = await RoomModel.deleteMany({ room: room[0]._id })
 
-                    const campaign = await service.createCampaign(dto, { id: user._id.toString() } as UserCheckDTO);
+                    const campaign = await service.createCampaign(dto, user._id.toString());
                 })
             })
             describe('and the data is invalid', () => {
@@ -40,7 +40,7 @@ describe('CampaignService', () => {
                     const dto = getCreateCampaignDTO({ tags: ["invalid invalid" as CampaignTags] })
 
                     try {
-                        const campaign = await service.createCampaign(dto, { id: new ObjectId().toString() } as UserCheckDTO);
+                        const campaign = await service.createCampaign(dto, new ObjectId().toString());
                     } catch (error) {
                         return
                     }
@@ -82,7 +82,7 @@ describe('CampaignService', () => {
                 expect(campaigns).toBeDefined();
                 expect(campaigns.length).toBeGreaterThanOrEqual(0);
                 expect(campaigns.length).toBeLessThanOrEqual(10);
-                
+
                 await CampaignModel.deleteOne({ _id: createCampaign._id.toString() })
             })
             it('should return a list of campaigns without a DTO', async () => {

@@ -1,5 +1,4 @@
 import { CampaignModel } from "@roll-to-match/models";
-import { UserCheckDTO } from '@roll-to-match/dto';
 import { describe, it } from "@jest/globals";
 import { CampaignService } from "@roll-to-match/services";
 import { getCreateCampaignDTO } from "@roll-to-match/dto-test/mock/MockCreateCampaignDTO"
@@ -18,7 +17,7 @@ describe('CampaignService', () => {
                     const dto = getCreateCampaignDTO({})
                     jest.spyOn(CampaignModel, 'create').mockImplementationOnce(() => Promise.resolve(getMockCampaign({}) as any));
 
-                    const campaign = await service.createCampaign(dto, { user: new ObjectId() } as UserCheckDTO);
+                    const campaign = await service.createCampaign(dto, new ObjectId().toString());
                 })
             })
             describe('and the data is invalid', () => {
@@ -28,7 +27,7 @@ describe('CampaignService', () => {
                     jest.spyOn(CampaignModel, 'create').mockImplementationOnce(() => { throw new Error() });
 
                     try {
-                        const campaign = await service.createCampaign(dto, { id: new ObjectId("").toString() } as UserCheckDTO);
+                        const campaign = await service.createCampaign(dto, new ObjectId("").toString());
                     } catch (error) {
                         return
                     }
