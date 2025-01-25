@@ -21,11 +21,13 @@
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/connect-mongo": "^3.1.2",
     "@types/ejs": "^3.1.5",
     "@types/firebase": "^2.4.32",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.16",
     "bcryptjs": "^2.4.3",
+    "connect-mongo": "^5.1.0",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.1",

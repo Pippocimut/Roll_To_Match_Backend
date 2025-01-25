@@ -6,10 +6,11 @@ import "dotenv/config";
 import { auth as onlyAuthorizedUsers } from './middlewares/authMiddleware';
 import indexRoutes from './routes/index';
 import { errorHandler } from './routes/error';
+import session from 'express-session'
+import MongoStore from 'connect-mongo'
 
 const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
-import session from 'express-session';
 const app = express();
 
 const PORT = process.env.PORT;
@@ -18,12 +19,6 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 app.use(express.static(path.join(__dirname, '../public')));
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false }
-}));
 
 app.use(express.urlencoded({ extended: false }));
 
@@ -32,18 +27,29 @@ app.use((req, res, next) => {
     next();
 });
 
-
-app.use('/auth', authRouter);
-
-app.use(onlyAuthorizedUsers);
-app.use('/', indexRoutes);
-app.use(errorHandler);
-
 mongoose.connect(process.env.BARE_MONGO_URL, {
     user: process.env.MONGO_USER,
     pass: process.env.MONGO_PASS,
     dbName: process.env.DATABASE_NAME,
 }).then(() => {
+    app.use(session({
+        secret: process.env.SESSION_SECRET || 'your-secret-key',
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create({
+            client: mongoose.connection.getClient(),
+        }),
+        cookie: {
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 1000 * 60 * 60 * 24 * 7 // 1 settimana
+        }
+    }));
+
+    app.use('/auth', authRouter);
+    app.use(onlyAuthorizedUsers);
+    app.use('/', indexRoutes);
+    app.use(errorHandler);
+
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
     });

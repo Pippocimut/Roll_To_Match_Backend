@@ -3,7 +3,7 @@
         "noImplicitAny": false,
         "noEmitOnError": true,
         "removeComments": false,
-        "moduleResolution": "nodenext",
+        "moduleResolution": "NodeNext",
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "module": "NodeNext",
