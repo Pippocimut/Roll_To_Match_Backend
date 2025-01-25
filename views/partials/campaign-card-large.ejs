@@ -12,14 +12,14 @@
                 <%= tag %>
                     <% }) %>
         </p>
+        <h3>
+            Player Queue
+        </h3>
         <ul>
             <% campaign.playerQueue.forEach(player=> { %>
                 <li>
-                    <%= player.slug %>
-                    <%= player.email %>
-                    <%= player.id %>
                     <%= player.username %>
-                    <%= JSON.stringify(player) %>
+                    <%= player.id %>
                     <% if(userId.toString()===player.id.toString()) { %>
                         <button id="remove-button">Remove</button>
                         <script>

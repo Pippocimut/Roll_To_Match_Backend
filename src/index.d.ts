@@ -1,9 +1,11 @@
 import { Request } from 'express'
+import { PersistedUser } from './database-models'
+import mongoose from 'mongoose'
 
 declare global {
   namespace Express {
     interface Request {
-      userId?: string | undefined
+      user?: mongoose.Document<PersistedUser>
     }
   }
 }

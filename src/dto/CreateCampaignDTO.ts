@@ -1,23 +1,14 @@
 import { z } from 'zod'
-import { RoomModel } from '../database-models/Room'
 import { CampaignTags } from '../data-types'
 
 export const CreateCampaignZodSchema = z.object({
     title: z.string(),
     description: z.string(),
-    room: z.string(),
-    tags: z.array(z.nativeEnum(CampaignTags)).min(1),
+    tags: z.array(z.nativeEnum(CampaignTags)).min(1).optional(),
     location : z.object({
         lat: z.number(),
         lng: z.number()
-    })
-}).refine(data => {
-    const getRoom = RoomModel.findById(data.room)
-    if (!getRoom) {
-        throw new Error('Room does not exist')
-    }
-
-    return true
+    }).optional()
 })
 
 export type CreateCampaignDTO = z.infer<typeof CreateCampaignZodSchema>

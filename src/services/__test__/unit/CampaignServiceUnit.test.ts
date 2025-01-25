@@ -14,20 +14,23 @@ describe('CampaignService', () => {
         describe('when creating a campaign', () => {
             describe('and the data is valid', () => {
                 it('should create a campaign', async () => {
+                    const roomId = new ObjectId().toString()
+                    const userId = new ObjectId().toString()
                     const dto = getCreateCampaignDTO({})
                     jest.spyOn(CampaignModel, 'create').mockImplementationOnce(() => Promise.resolve(getMockCampaign({}) as any));
 
-                    const campaign = await service.createCampaign(dto, new ObjectId().toString());
+                    const campaign = await service.createCampaign(dto, roomId, userId);
                 })
             })
             describe('and the data is invalid', () => {
                 it('should throw an error database validation fails', async () => {
                     const dto = getCreateCampaignDTO({})
-
+                    const roomId = new ObjectId().toString()
+                    const userId = new ObjectId().toString()
                     jest.spyOn(CampaignModel, 'create').mockImplementationOnce(() => { throw new Error() });
 
                     try {
-                        const campaign = await service.createCampaign(dto, new ObjectId("").toString());
+                        const campaign = await service.createCampaign(dto, roomId, userId);
                     } catch (error) {
                         return
                     }

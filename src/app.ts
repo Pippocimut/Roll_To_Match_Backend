@@ -5,6 +5,7 @@ import path from 'path';
 import "dotenv/config";
 import { auth as onlyAuthorizedUsers } from './middlewares/authMiddleware';
 import indexRoutes from './routes/index';
+import { errorHandler } from './routes/error';
 
 const authRouter = require('./routes/auth');
 const errorRouter = require('./routes/error');
@@ -36,7 +37,7 @@ app.use('/auth', authRouter);
 
 app.use(onlyAuthorizedUsers);
 app.use('/', indexRoutes);
-app.use(errorRouter);
+app.use(errorHandler);
 
 mongoose.connect(process.env.BARE_MONGO_URL, {
     user: process.env.MONGO_USER,

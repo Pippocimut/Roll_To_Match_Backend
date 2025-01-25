@@ -11,30 +11,62 @@ export class RoomCampaignController {
     public static getCampaigns = getCampaigns;
 }
 
-async function createCampaign(req: Request & { user: string }, res: Response): Promise<void> {
-    const getRoom = await RoomModel.findById(req.params.id);
-    if (!getRoom) {
-        throw new Error('Room does not exist')
-    }
-    const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
-    const campaign: PersistedCampaign = {
-        title: campaignDTO.title,
-        description: campaignDTO.description,
-        owner: new ObjectId(req.userId),
-        room: new ObjectId(campaignDTO.room),
-        tags: campaignDTO.tags,
-        registeredAt: new Date(),
-        reviews: new DocumentArray([]),
-        playerQueue: new DocumentArray([]),
-        activePlayers: new DocumentArray([]),
-    }
+async function createCampaign(req: Request, res: Response): Promise<void> {
+    try {
+        const getRoom = await RoomModel.findById(req.params.id);
+        if (!getRoom) {
+            throw new Error('Room does not exist')
+        }
+        console.log("All good getting room")
 
-    const campaignCreated = await CampaignModel.create(campaign);
-    if (!campaignCreated) {
-        throw new Error('Error creating campaign')
-    }
+        const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
 
-    res.status(201).send(campaign);
+        console.log("All good parsing campaign")
+
+        const coordinates = campaignDTO.location ? [campaignDTO.location.lng || 0, campaignDTO.location.lat || 0] : [0, 0]
+
+        const location =  {
+            type: "Point",
+            coordinates: coordinates
+        }
+        
+        const tags = campaignDTO.tags || []
+        const owner = new ObjectId(req.user._id.toString())
+        const room = new ObjectId(getRoom._id.toString())
+
+        const campaign: PersistedCampaign = {
+            title: campaignDTO.title,
+            description: campaignDTO.description,
+            owner: owner,
+            room: room,
+            location: location,
+            tags: tags,
+            registeredAt: new Date(),
+            reviews: new DocumentArray([]),
+            playerQueue: [],
+            activePlayers: [],
+        }
+
+        console.log("All good creating campaign")
+
+        const campaignCreated = await CampaignModel.create(campaign);
+        if (!campaignCreated) {
+            throw new Error('Error creating campaign')
+        }
+
+        console.log("All good creating campaign")
+
+        const updateRoom = await RoomModel.findByIdAndUpdate(getRoom._id, { $addToSet: { campaigns: campaignCreated._id } });
+        if (!updateRoom) {
+            throw new Error('Error updating room')
+        }
+
+        console.log("All good updating room")
+
+        res.redirect('/room/' + getRoom._id.toString());
+    } catch (err) {
+        res.status(400).send(err);
+    }
 }
 
 async function getCampaigns(req: Request, res: Response): Promise<void> {

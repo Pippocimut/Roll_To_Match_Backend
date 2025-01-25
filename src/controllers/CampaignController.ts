@@ -4,7 +4,7 @@ import { SearchCampaignDTO, SearchCampaignZodSchema } from "../dto/SearchCampaig
 import { CampaignService } from "../services/CampaignService";
 import CampaignAdapter from "../adapters/Campaign";
 import { Request, Response } from "express";
-import { CampaignModel, UserModel } from "@roll-to-match/models";
+import { CampaignModel } from "@roll-to-match/models";
 
 export class CampaignController {
 
@@ -23,23 +23,26 @@ export class CampaignController {
     }
 
     public async createCampaign(req: Request, res: Response): Promise<void> {
-        const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
-
         try {
-            const campaign = await this.campaignService.createCampaign(campaignDTO, req.userId)
-            res.status(201).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign));
+            const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
+            const userId = req.user._id.toString()
+            const roomId = req.params.id
+
+            const campaign = await this.campaignService.createCampaign(campaignDTO, roomId, userId)
+
+            res.redirect('/rooms')
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
     }
 
     public getCampaigns = async (req: Request, res: Response): Promise<void> => {
-        const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
-
         try {
+            const userId = req.user._id.toString()
+            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: req.userId });
+            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: userId });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
@@ -47,9 +50,10 @@ export class CampaignController {
 
     public getCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
+            const userId = req.user._id.toString()
             const campaign = await this.campaignService.getCampaign(req.params.id)
             console.log(JSON.stringify(campaign))
-            res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign), userId: req.userId });
+            res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign), userId: userId });
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
@@ -60,9 +64,9 @@ export class CampaignController {
             const updateCampaignDTO: UpdateCampaignDTO = UpdateCampaignZodSchema.parse(req.body)
 
             const campaign = await this.campaignService.getCampaign(req.params.id)
-            const user = await UserModel.findById(req.userId)
+            const user = req.user
 
-            if (campaign.owner && campaign.owner.toString() !== user.id) {
+            if (campaign.owner && campaign.owner.toString() !== user._id.toString()) {
                 res.status(401).send({ message: 'Unauthorized' })
                 return
             }
@@ -79,7 +83,7 @@ export class CampaignController {
     public async deleteCampaign(req: Request, res: Response): Promise<void> {
         try {
             const campaign = await this.campaignService.getCampaign(req.params.id)
-            const user = await UserModel.findById(req.userId)
+            const user = req.user
 
             if (campaign.owner && campaign.owner.toString() !== user.id) {
                 res.status(401).send({ message: 'Unauthorized' })

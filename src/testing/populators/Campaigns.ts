@@ -103,8 +103,8 @@ export class CampaignPopulator extends Populator {
                 coordinates: [faker.location.longitude(), faker.location.latitude()]
             },
             tags: tags,
-            playerQueue: new DocumentArray([]),
-            activePlayers: new DocumentArray([]),
+            playerQueue: [],
+            activePlayers: [],
             reviews: new DocumentArray([]),
             registeredAt: new Date(),
             owner: owner._id,

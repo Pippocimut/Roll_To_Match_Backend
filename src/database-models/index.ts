@@ -1,5 +1,4 @@
-export * from './Player';
+export * from './Campaign';
 export * from './Review';
 export * from './Room';
 export * from './User';
-export * from './Campaign';

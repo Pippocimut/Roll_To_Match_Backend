@@ -1,0 +1,27 @@
+<div id="room-card">
+    <form action="/create-campaign/<%= room.id %>" method="get">
+        <input type="hidden" name="roomId" value="<%= room.id %>">
+        <h2>
+            <%= room.title %>
+        </h2>
+        <ul>
+            <% room.campaigns.forEach(campaign=> { %>
+                <li>
+                    <% JSON.stringify(campaign) %>
+                    <%= campaign.title %>
+                    <button>
+                        <style>
+                            a {
+                                text-decoration: none;
+                                color: black;
+                            }
+                        </style>
+                        <a href="/campaign/<%= campaign.id %>">View</a>
+                    </button>
+                </li>
+                <% }) %>
+        </ul>
+
+        <input type="submit" value="Create Campaign">
+    </form>
+</div>

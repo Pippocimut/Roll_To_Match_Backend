@@ -11,7 +11,6 @@ export function getCreateCampaignDTO(createCampaignDTO?: Partial<CreateCampaignD
             lng: 0
         },
         tags: [CampaignTags.DND],
-        room: new ObjectId(),
         ...createCampaignDTO
     }
 }

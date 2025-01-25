@@ -77,6 +77,7 @@ export class RoomPopulator extends Populator {
     private createRandomRoom(owner: any): PersistedRoom {
         return {
             campaigns: [],
+            title: "Room " + Math.floor(Math.random() * 1000000),
             owner: owner._id
         };
     }

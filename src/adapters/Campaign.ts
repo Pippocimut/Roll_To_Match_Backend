@@ -1,5 +1,8 @@
 import { PersistedCampaign } from "../database-models/Campaign";
 import { MongoDocument } from "../data-types";
+import { AdaptedPlayer } from "./Player";
+import { fromPersistedToReturnedPlayer } from "./Player";
+import { PersistedUser } from "../database-models/User";
 
 export type AdaptedCampaign = {
     id: string,
@@ -14,11 +17,15 @@ export type AdaptedCampaign = {
     tags: string[],
     registeredAt: Date,
     reviews: any[],
-    playerQueue: any[],
-    activePlayers: any[],
+    playerQueue: AdaptedPlayer[],
+    activePlayers: AdaptedPlayer[],
 }
 
 function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<PersistedCampaign>): AdaptedCampaign {
+
+    const playerQueue = persistedCampaign.playerQueue.map(player => fromPersistedToReturnedPlayer(player))
+    const activePlayers = persistedCampaign.activePlayers.map(player => fromPersistedToReturnedPlayer(player))
+
     return {
         id: persistedCampaign._id.toString(),
         title: persistedCampaign.title,
@@ -29,8 +36,8 @@ function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<Persis
         tags: persistedCampaign.tags,
         registeredAt: persistedCampaign.registeredAt,
         reviews: persistedCampaign.reviews,
-        playerQueue: persistedCampaign.playerQueue,
-        activePlayers: persistedCampaign.activePlayers,
+        playerQueue,
+        activePlayers,
     }
 }
 

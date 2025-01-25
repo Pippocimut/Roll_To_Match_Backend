@@ -28,11 +28,11 @@ describe('CampaignService', () => {
                 it('should create a campaign', async () => {
                     const room = await RoomModel.find({}).limit(1);
                     const user = await UserModel.findOne(room[0].owner);
-                    const dto = getCreateCampaignDTO({ room: room[0]._id.toString() })
+                    const dto = getCreateCampaignDTO()
 
                     const campaignsInRoom = await RoomModel.deleteMany({ room: room[0]._id })
 
-                    const campaign = await service.createCampaign(dto, user._id.toString());
+                    const campaign = await service.createCampaign(dto, room[0]._id.toString(), user._id.toString());
                 })
             })
             describe('and the data is invalid', () => {
@@ -40,7 +40,7 @@ describe('CampaignService', () => {
                     const dto = getCreateCampaignDTO({ tags: ["invalid invalid" as CampaignTags] })
 
                     try {
-                        const campaign = await service.createCampaign(dto, new ObjectId().toString());
+                        const campaign = await service.createCampaign(dto, new ObjectId().toString(), new ObjectId().toString());
                     } catch (error) {
                         return
                     }

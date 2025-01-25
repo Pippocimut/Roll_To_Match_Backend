@@ -1,18 +1,35 @@
 import mongoose, { InferSchemaType } from "mongoose";
 import { ReviewSchema } from "./Review";
-import { PlayerSchema } from "./Player";
-import { CampaignTags } from "../data-types";
+import { UserSchema } from "./User";
+import { CampaignTags, MongoDocument } from "../data-types";
+import { PersistedUser } from "./User";
 
-export const CampaignSchema = new mongoose.Schema({
+export interface PersistedCampaign {
+    title: string;
+    description: string;
+    owner: mongoose.Types.ObjectId;
+    room: mongoose.Types.ObjectId;
+    location: {
+        type: string;
+        coordinates: number[];
+    };
+    tags: string[];
+    registeredAt: Date;
+    reviews: any[];
+    playerQueue: MongoDocument<PersistedUser>[];
+    activePlayers: MongoDocument<PersistedUser>[];
+}
+
+export const CampaignSchema = new mongoose.Schema<PersistedCampaign>({
     title: {
         type: String,
         required: true
     },
-    description:{
+    description: {
         type: String,
         required: true
     },
-    room : {
+    room: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room',
         required: false
@@ -44,12 +61,32 @@ export const CampaignSchema = new mongoose.Schema({
         }
     },
     playerQueue: [{
-        type: PlayerSchema,
+        type: {
+            _id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                required: true
+            },
+            username: String,
+            email: String,
+            slug: String,
+            date: Date,
+        },
         required: false,
         default: []
     }],
     activePlayers: [{
-        type: PlayerSchema,
+        type: {
+            _id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                required: true
+            },
+            username: String,
+            email: String,
+            slug: String,
+            date: Date,
+        },
         required: false,
         default: []
     }],
@@ -59,6 +96,5 @@ export const CampaignSchema = new mongoose.Schema({
     }
 });
 
-export const CampaignModel = mongoose.model('Campaign', CampaignSchema);
-export type PersistedCampaign = InferSchemaType<typeof CampaignSchema>;
+export const CampaignModel = mongoose.model<PersistedCampaign>('Campaign', CampaignSchema);
 

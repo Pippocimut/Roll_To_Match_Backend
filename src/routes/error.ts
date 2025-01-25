@@ -1,18 +1,21 @@
-const express = require('express')
-const router = express.Router()
+import { Request, Response, NextFunction } from "express";
 
-router.use((err, req, res, next) => {
-    console.error(err.stack);
+export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err.stack)
+    let title = 'Error'
+    let message = err.message
+    let statusError = 500
 
     if (err instanceof SyntaxError) {
-        return res.status(400).json({ error: 'Invalid JSON' });
+        title = 'Invalid JSON'
+        message = 'The request body is not valid JSON'
+        statusError = 400
     }
 
-    if (err.status) {
-        return res.status(err.status).json({ error: err.message });
+    if (err instanceof Error && 'status' in err && typeof err.status === 'number') {
+        statusError = err.status
+        title = err.message
     }
 
-    res.status(500).json({ error: 'Internal server error' });
-});
-
-module.exports = router
+    res.status(statusError).render('pages/error', { title, message });
+};

@@ -13,9 +13,9 @@ export class ReviewController {
     public static deleteReview = deleteReview
 }
 
-async function createReview(req: Request & { user: string }, res: Response): Promise<void> {
+async function createReview(req: Request, res: Response): Promise<void> {
     const campaignId = req.params.campaignId
-    const userId = req.userId;
+    const userId = req.user._id.toString()
     const createReviewDTO: CreateReviewDTO = CreateReviewZodSchema.parse(req.body)
     const { title, message, stars } = createReviewDTO
 
@@ -41,7 +41,7 @@ async function createReview(req: Request & { user: string }, res: Response): Pro
     await campaign.save()
     res.status(201).json(review)
 }
-async function getReviews(req: Request & { user: string }, res: Response): Promise<void> {
+async function getReviews(req: Request, res: Response): Promise<void> {
     const campaignId = req.params.campaignId
     const campaign = await CampaignModel.findById(campaignId)
     if (!campaign) {
@@ -50,23 +50,23 @@ async function getReviews(req: Request & { user: string }, res: Response): Promi
 
     res.json(campaign.reviews)
 }
-async function getReview(req: Request & { user: string }, res: Response): Promise<void> {
+async function getReview(req: Request, res: Response): Promise<void> {
     const reviewId = req.params.reviewId
     const campaignId = req.params.campaignId
     const campaign = await CampaignModel.findById(campaignId)
     if (!campaign) {
         throw new Error('Campaign not found')
     }
-    const review = campaign.reviews.id(reviewId)
+    const review = campaign.reviews.find(review => review._id.toString() === reviewId)
     if (!review) {
         throw new Error('Review not found')
     }
     res.json(review)
 }
-async function updateReview(req: Request & { user: string }, res: Response): Promise<void> {
+async function updateReview(req: Request, res: Response): Promise<void> {
     const reviewId = req.params.reviewId
     const campaignId = req.params.campaignId
-    const userId = req.userId
+    const userId = req.user._id.toString()
     const updateReviewDTO: UpdateReviewDTO = UpdateReviewZodSchema.parse(req.body)
     const { title, message, stars } = updateReviewDTO
 
@@ -79,7 +79,7 @@ async function updateReview(req: Request & { user: string }, res: Response): Pro
     if (!user) {
         throw new Error('User not found')
     }
-    if (!campaign.reviews.id(reviewId)) {
+    if (!campaign.reviews.find(review => review._id.toString() === reviewId)) {
         throw new Error('Review not found')
     }
 
@@ -97,10 +97,10 @@ async function updateReview(req: Request & { user: string }, res: Response): Pro
     res.json(review)
 
 }
-async function deleteReview(req: Request & { user: string }, res: Response): Promise<void> {
+async function deleteReview(req: Request, res: Response): Promise<void> {
     const reviewId = req.params.reviewId
     const campaignId = req.params.campaignId
-    const userId = req.userId
+    const userId = req.user._id.toString()
 
     const campaign = await CampaignModel.findById(campaignId)
     if (!campaign) {
@@ -111,7 +111,7 @@ async function deleteReview(req: Request & { user: string }, res: Response): Pro
     if (!user) {
         throw new Error('User not found')
     }
-    if (!campaign.reviews.id(reviewId)) {
+    if (!campaign.reviews.find(review => review._id.toString() === reviewId)) {
         throw new Error('Review not found')
     }
 
@@ -120,7 +120,7 @@ async function deleteReview(req: Request & { user: string }, res: Response): Pro
         throw new Error('Review not found')
     }
 
-    campaign.reviews.pull(review)
+    campaign.reviews = campaign.reviews.filter(review => review._id.toString() !== reviewId)
     await campaign.save()
     res.json(review)
 }

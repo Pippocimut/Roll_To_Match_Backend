@@ -7,7 +7,7 @@ import { MongoDocument } from "../data-types";
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 
 export interface ICampaignService {
-    createCampaign(campaignDTO: CreateCampaignDTO, ownerId: string): Promise<MongoDocument<PersistedCampaign>>;
+    createCampaign(campaignDTO: CreateCampaignDTO, roomId: string, ownerId: string): Promise<MongoDocument<PersistedCampaign>>;
     getCampaigns(searchParamsDTO: SearchCampaignDTO): Promise<MongoDocument<PersistedCampaign>[]>;
     getCampaign(campaignId: string): Promise<MongoDocument<PersistedCampaign>>
     updateCampaign(campaignId: string, campaignDTO: UpdateCampaignDTO): Promise<MongoDocument<PersistedCampaign>>
@@ -22,12 +22,12 @@ export class CampaignService implements ICampaignService {
         this.campaignModel = campaignModel;
     }
 
-    public async createCampaign(campaignDTO: CreateCampaignDTO, ownerId: string): Promise<MongoDocument<PersistedCampaign>> {
+    public async createCampaign(campaignDTO: CreateCampaignDTO, roomId: string, ownerId: string): Promise<MongoDocument<PersistedCampaign>> {
         const campaign: PersistedCampaign = {
             title: campaignDTO.title,
             description: campaignDTO.description,
             owner: new ObjectId(ownerId),
-            room: new ObjectId(campaignDTO.room),
+            room: new ObjectId(roomId),
             location: {
                 type: "Point",
                 coordinates: [campaignDTO.location.lat, campaignDTO.location.lng]

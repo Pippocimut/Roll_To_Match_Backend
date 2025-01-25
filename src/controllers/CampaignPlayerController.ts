@@ -1,8 +1,8 @@
-import { Request, Response } from 'express'
+/* import { Request, Response } from 'express'
 import { PersistedUser, UserModel } from '../database-models/User'
 import { MongoDocument } from '../data-types'
-import { PersistedPlayer } from '../database-models/Player'
 import { CampaignModel } from '../database-models/Campaign'
+import { AdaptedPlayer, fromPersistedToReturnedPlayer } from '../adapters/Player'
 
 export class CampaignPlayerController {
     public static createPlayer = createPlayer
@@ -25,8 +25,8 @@ async function createPlayer(req: Request, res: Response): Promise<void> {
             throw new Error('Campaign not found')
         }
 
-        const player: PersistedPlayer = {
-            id: user._id,
+        const player: AdaptedPlayer = {
+            id: user._id.toString(),
             slug: user.slug,
             email: user.email
         }
@@ -90,4 +90,4 @@ async function deletePlayer(req: Request, res: Response): Promise<void> {
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
-}
+} */

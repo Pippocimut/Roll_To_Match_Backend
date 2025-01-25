@@ -4,7 +4,10 @@
   "description": "A project for my cloud computing class of 2024 in JS",
   "main": "built/app.js",
   "scripts": {
-    "start": "tsc --build && tailwindcss -i ./views/css/input.css -o ./views/css/output.css && nodemon built/app.js",
+    "start-tsc": "tsc --build --watch",
+    "start-tailwind": "tailwindcss -i ./views/css/input.css -o ./views/css/output.css",
+    "start-nodemon": "nodemon built/app.js",
+    "start": "npm run start-tsc && npm run start-tailwind && npm run start-nodemon",
     "start-docker": "docker image  build -t roll-to-match:1 . && docker container run -d --name roll-to-match --publish 80:3000 roll-to-match:1",
     "restart-docker": "docker container stop Staging && docker container rm Staging && docker image  build -t roll-to-match:1 . && docker container run -d --name Staging --publish 80:3000 roll-to-match:1",
     "build": "tsc --build",

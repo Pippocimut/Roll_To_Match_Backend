@@ -1,0 +1,9 @@
+<div id="room-card">
+    <form action="/room/<%= room.id %>" method="get">
+        <input type="hidden" name="roomId" value="<%= room.id %>">
+        <h2>
+            <%= room.title %>
+        </h2>
+        <input type="submit" value="See Room">
+    </form>
+</div>

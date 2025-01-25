@@ -1,6 +1,10 @@
 import mongoose, { InferSchemaType } from 'mongoose';
 
 const RoomSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
     campaigns: [{
         type : mongoose.Schema.Types.ObjectId,
         ref: 'Campaign'

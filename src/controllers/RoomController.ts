@@ -1,45 +1,51 @@
 import { Request, Response } from "express";
 import { PersistedRoom, RoomModel } from "../database-models/Room";
 import { CreateRoomZodSchema } from "../dto/CreateRoomDTO";
+import { fromPersistedToReturnedRoom } from "../adapters/Room";
 import mongoose from "mongoose"
 const { ObjectId, DocumentArray } = mongoose.Types;
 
 export class RoomController {
-    public static createRoom = createRoom;
-    public static getRooms = getRooms;
-    public static getRoom = getRoom;
+    public static createRoom = async (req: Request, res: Response) => {
+        try {
+            const createRoomDTO = CreateRoomZodSchema.parse(req.body);
+
+            const room: PersistedRoom = {
+                title: createRoomDTO.title,
+                owner: new ObjectId(req.user._id.toString()),
+                campaigns: []
+            }
+
+            const createdRoom = await RoomModel.create(room);
+
+            res.redirect('/rooms');
+        } catch (err) {
+            res.status(400).send(err);
+        }
+
+    }
+
+    public static getRooms = async (req: Request, res: Response) => {
+        const userId = req.user._id.toString();
+
+        const rooms = await RoomModel.find({ owner: userId }).populate('campaigns').exec();
+        const adaptedRooms = await Promise.all(rooms.map(async (room) => fromPersistedToReturnedRoom(room)));
+        console.log(adaptedRooms)
+
+        res.render('pages/rooms', { rooms: adaptedRooms });
+    }
+
+    public static getRoom = async (req: Request, res: Response) => {
+        const roomId = req.params.id;
+
+        const room = await RoomModel.findById(roomId);
+        const adaptedRoom = await fromPersistedToReturnedRoom(room);
+
+        res.render('pages/room', { room: adaptedRoom });
+    }
+
     public static updateRoom = updateRoom;
     public static deleteRoom = deleteRoom;
-}
-
-
-export async function createRoom(req, res) {
-    const createRoomDTO = CreateRoomZodSchema.parse(req.body);
-    const room: PersistedRoom = {
-        ...createRoomDTO,
-        owner: new ObjectId(req.userId),
-        campaigns: []
-    }
-    try {
-        const createdRoom = await RoomModel.create(room);
-        res.status(201).send(createdRoom);
-    } catch (err) {
-        res.status(400).send(err);
-    }
-}
-
-export async function getRooms(req: Request, res: Response): Promise<void> {
-    const rooms = await RoomModel.find();
-    res.send(rooms);
-}
-
-export async function getRoom(req, res) {
-    try {
-        const room = await RoomModel.findById(req.params.id);
-        res.send(room);
-    } catch (err) {
-        res.status(400).send(err);
-    }
 }
 
 export async function updateRoom(req, res) {
