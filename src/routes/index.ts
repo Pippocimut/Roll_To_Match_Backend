@@ -6,38 +6,43 @@ import { RoomCampaignController } from '../controllers/RoomCampaignController';
 import { RoomController } from '../controllers/RoomController';
 import { ReviewController } from '../controllers/ReviewController';
 import { CampaignCandidatePlayerController } from 'controllers/CampaignCandidatePlayerController';
+import { PageCampaignController } from '../controllers/WebControllers/PageCampaignController';
+import { PageRoomController } from '../controllers/WebControllers/PageRoomController';
 
 const router = Router();
 
 router.get('/', CampaignController.getInstance().getCampaigns);
 router.get('/create-campaign/:id', (req, res) => { res.render('pages/create-campaign', { roomId: req.params.id }); });
 router.get('/create-room', (req, res) => { res.render('pages/create-room'); });
+router.get('/campaign/:id', PageCampaignController.getInstance().getCampaign);
+router.get('/room/:id', PageRoomController.getInstance().getRoom);
+router.get('/room/:id/campaigns', PageCampaignController.getInstance().getCampaigns);
 
-router.get('/campaigns', CampaignController.getInstance().getCampaigns);
-router.get('/campaign/:id', CampaignController.getInstance().getCampaign);
+router.get('/api/v1/campaigns', CampaignController.getInstance().getCampaigns);
+router.get('/api/v1/campaign/:id', CampaignController.getInstance().getCampaign);
 
-router.post('/room', RoomController.createRoom);
-router.get('/rooms', RoomController.getRooms); 
-router.get('/room/:id', RoomController.getRoom);
-router.put('/room/:id', RoomController.updateRoom);
-router.delete('/room/:id', RoomController.deleteRoom);
+router.post('/api/v1/room', RoomController.createRoom);
+router.get('/api/v1/rooms', RoomController.getRooms);
+router.get('/api/v1/room/:id', RoomController.getRoom);
+router.put('/api/v1/room/:id', RoomController.updateRoom);
+router.delete('/api/v1/room/:id', RoomController.deleteRoom);
 
-router.post('/room/:id/campaign', RoomCampaignController.createCampaign);
-router.get('/room/:id/campaigns', RoomCampaignController.getCampaigns);
+router.post('/api/v1/room/:id/campaign', RoomCampaignController.createCampaign);
+router.get('/api/v1/room/:id/campaigns', RoomCampaignController.getCampaigns);
 
-router.put('/campaign/:id', CampaignController.getInstance().updateCampaign);
-router.delete('/campaign/:id', CampaignController.getInstance().deleteCampaign);
+router.put('/api/v1/campaign/:id', CampaignController.getInstance().updateCampaign);
+router.delete('/api/v1/campaign/:id', CampaignController.getInstance().deleteCampaign);
 
-router.post('/campaign/:id/review', ReviewController.createReview);
-router.get('/campaign/:id/reviews', ReviewController.getReviews);
-router.get('/campaign/:id/review/:id', ReviewController.getReview);
-router.put('/campaign/:id/review/:id', ReviewController.updateReview);
-router.delete('/campaign/:id/review/:id', ReviewController.deleteReview);
+router.post('/api/v1/campaign/:id/review', ReviewController.createReview);
+router.get('/api/v1/campaign/:id/reviews', ReviewController.getReviews);
+router.get('/api/v1/campaign/:id/review/:id', ReviewController.getReview);
+router.put('/api/v1/campaign/:id/review/:id', ReviewController.updateReview);
+router.delete('/api/v1/campaign/:id/review/:id', ReviewController.deleteReview);
 
-router.post('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getInstance().createCandidatePlayer);
-router.get('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getCandidatePlayers);
-router.get('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getCandidatePlayer);
-router.delete('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getInstance().deleteCandidatePlayer);
+router.post('/api/v1/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getInstance().createCandidatePlayer);
+router.get('/api/v1/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getCandidatePlayers);
+router.get('/api/v1/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getCandidatePlayer);
+router.delete('/api/v1/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getInstance().deleteCandidatePlayer);
 
 // router.post('/campaign/:campaignId/player', CampaignPlayerController.createPlayer);
 // router.get('/campaign/:campaignId/players', CampaignPlayerController.getPlayers);

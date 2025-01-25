@@ -1,90 +1,83 @@
 <div id="campaign-card">
-    <form action="/campaign/<%= campaign.id %>/candidate" method="post">
-        <input type="hidden" name="campaignId" value="<%= campaign.id %>">
-        <h2>
-            <%= campaign.name %>
-        </h2>
-        <p>
-            Description <%= campaign.description %>
-        </p>
-        <p>
-            <% campaign.tags.forEach(tag=> { %>
-                <%= tag %>
-                    <% }) %>
-        </p>
-        <h3>
-            Player Queue
-        </h3>
-        <ul>
-            <% campaign.playerQueue.forEach(player=> { %>
-                <li>
-                    <%= player.username %>
-                    <%= player.id %>
-                    <% if(userId.toString()===player.id.toString()) { %>
-                        <button id="remove-button">Remove</button>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', () => {
-                                const button = document.getElementById('remove-button')
-                                button.addEventListener('click', async (e) => {
-                                    e.preventDefault() // Impedisce l'invio del form
-                                    e.stopPropagation() // Ferma la propagazione dell'evento
-
-                                    try {
-                                        const result = await fetch('/campaign/<%= campaign.id %>/player/<%= player.id %>', {
-                                            method: 'DELETE',
-                                            headers: {
-                                                'Content-Type': 'application/json'
-                                            }
-                                        })
-
-                                        if (result.ok) {
-                                            // Opzionale: ricarica la pagina o aggiorna l'UI
-                                            window.location.reload()
-                                        } else {
-                                            console.error('Errore nella rimozione:', await result.text())
-                                        }
-                                    } catch (error) {
-                                        console.error('Errore nella richiesta:', error)
-                                    }
-                                })
-                            })
-                        </script>
-                        <% } %>
-                </li>
+    <h2>
+        <%= campaign.name %>
+    </h2>
+    <p>
+        Description <%= campaign.description %>
+    </p>
+    <p>
+        <% campaign.tags.forEach(tag=> { %>
+            <%= tag %>
                 <% }) %>
-        </ul>
-        <ul>
-            <% campaign.activePlayers.forEach(player=> { %>
-                <li>
-                    <%= player.slug %>
+    </p>
+    <h3>
+        Player Queue
+    </h3>
+    <%- include('./remove-candidate') %>
+    <ul id="player-queue">
+        <% campaign.playerQueue.forEach(player=> { %>
+            <li>
+                <%= player.username %>
+                    <%= player.id %>
+                        <% if(userId.toString()===player.id.toString()) { %>
+                            <script>
+                                const removeButtonQueue = createRemoveButton('<%= campaign.id %>', '<%= player.id %>')
+                                document.currentScript.parentElement.appendChild(removeButtonQueue)
+                            </script>
+                            <% } %>
+            </li>
+            <% }) %>
+    </ul>
+    <ul>
+        <% campaign.activePlayers.forEach(player=> { %>
+            <li>
+                <%= player.slug %>
                     <%= player.email %>
-                    <%= player.id %>
-                    <%= player.username %>
-                    <button id="remove-button">Remove</button>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            const button = document.getElementById('remove-button')
-                            button.addEventListener('click', async (e) => {
-                                e.preventDefault() // Impedisce l'invio del form
-                                e.stopPropagation() // Ferma la propagazione dell'evento
+                        <%= player.id %>
+                            <%= player.username %>
+                                <script>
+                                    const removeButtonActive = createRemoveButton(<%= campaign.id %>, <%= player.id %>)
+                                    document.currentScript.parentElement.appendChild(removeButtonActive)
+                                </script>
+            </li>
+            <% }) %>
+    </ul>
+    <button id="join-campaign-button">
+        Join Campaign
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const button = document.getElementById('join-campaign-button')
+                button.addEventListener('click', async (e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
 
-                                try {
-                                    const result = await fetch('/campaign/<%= campaign.id %>/player/<%= player.id %>', {
-                                        method: 'DELETE',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        }
-                                    })
-                                } catch (error) {
-                                    console.error('Errore nella richiesta:', error)
-                                }
-                            })
+                    try {
+                        const result = await fetch('/api/v1/campaign/<%= campaign.id %>/candidate', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
                         })
-                    </script>
-                </li>
-                <% }) %>
-        </ul>
 
-        <input type="submit" value="Join Campaign">
-    </form>
+                        if (result.ok) {
+                            const response = await result.json()
+                            const playerQueue = document.getElementById('player-queue')
+                            const newPlayer = document.createElement('li')
+                            newPlayer.textContent = response.username
+
+                            const removeButton = createRemoveButton('<%= campaign.id %>',  response.id )
+                            newPlayer.appendChild(removeButton)
+                            
+                            playerQueue.appendChild(newPlayer)
+                        } else {
+                            console.error('Errore nella richiesta:', await result.text())
+                        }
+                    } catch (error) {
+                        console.error('Errore nella richiesta:', error)
+                    }
+                })
+            })
+        </script>
+
+    </button>
 </div>

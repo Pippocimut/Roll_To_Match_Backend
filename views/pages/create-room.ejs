@@ -6,10 +6,39 @@
 
 <body>
     <h1>Create Room</h1>
-    <form action="/room" method="post">
+    <form id="create-room-form">
         <input type="text" name="title" placeholder="Title">
         <button type="submit">Create</button>
     </form>
+
+    <script>
+        document.getElementById('create-room-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const title = formData.get('title');
+
+            try {
+                const response = await fetch('/api/v1/room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create room');
+                }
+
+                const data = await response.json();
+                window.location.href = `/room/${data.id}`;
+            } catch (error) {
+                // Assuming you have a toast library or function
+                showToast('Something went wrong creating the room');
+            }
+        });
+    </script>
 
 </body>
 

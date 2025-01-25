@@ -29,8 +29,9 @@ export class CampaignController {
             const roomId = req.params.id
 
             const campaign = await this.campaignService.createCampaign(campaignDTO, roomId, userId)
-
-            res.redirect('/rooms')
+            const adaptedCampaign = CampaignAdapter.fromPersistedToReturnedCampaign(campaign)
+            
+            res.status(200).send(adaptedCampaign)
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
@@ -42,7 +43,7 @@ export class CampaignController {
             const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: userId });
+            res.status(200).send(adaptedCampaigns)
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }
@@ -53,7 +54,7 @@ export class CampaignController {
             const userId = req.user._id.toString()
             const campaign = await this.campaignService.getCampaign(req.params.id)
             console.log(JSON.stringify(campaign))
-            res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign), userId: userId });
+            res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign))
         } catch (err) {
             this.CampaignControllerHandleError(err, res)
         }

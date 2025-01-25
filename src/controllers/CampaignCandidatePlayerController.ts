@@ -5,6 +5,7 @@ import { CampaignService } from 'services/CampaignService'
 import { CandidateService } from 'services/CandidateService'
 import { CreateCandidateDTO } from 'dto/CreateCandidateDTO'
 import { CreateCandidateZodSchema } from 'dto/CreateCandidateDTO'
+import PlayerAdapter from '../adapters/Player'
 
 export class CampaignCandidatePlayerController {
     private static instance: CampaignCandidatePlayerController;
@@ -36,7 +37,9 @@ export class CampaignCandidatePlayerController {
             const campaign = await this.campaignService.getCampaign(campaignId)
             const player = await this.candidateService.createCandidate(campaign._id.toString(), user)
 
-            res.status(201).redirect(`/campaign/${campaignId}`)
+            const adaptedPlayer = PlayerAdapter.fromPersistedToReturnedPlayer(player)
+
+            res.status(201).send(adaptedPlayer)
         } catch (error) {
             console.log("I'm here")
             return next(error)

@@ -7,14 +7,14 @@ import { UpdateWriteOpResult } from "mongoose";
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 
 export interface ICandidateService {
-    createCandidate(campaignId: string, candidate: CreateCandidateDTO): Promise<UpdateWriteOpResult>;
+    createCandidate(campaignId: string, candidate: CreateCandidateDTO): Promise<MongoDocument<PersistedUser>>;
     deleteCandidate(campaignId: string, candidateId: string): Promise<UpdateWriteOpResult>;
 }
 
 export class CandidateService implements ICandidateService {
     constructor(private campaignModel: typeof CampaignModel) { }
 
-    public async createCandidate(campaignId: string, candidate: PersistedUser): Promise<UpdateWriteOpResult> {
+    public async createCandidate(campaignId: string, candidate: MongoDocument<PersistedUser>): Promise<MongoDocument<PersistedUser>> {
         
 
         const campaign = await this.campaignModel.findById(campaignId).exec();
@@ -22,13 +22,20 @@ export class CandidateService implements ICandidateService {
             throw new Error('Campaign not found');
         }
 
-        const newCandidate = await this.campaignModel.updateOne({
+        const updateResult = await this.campaignModel.updateOne({
             _id: new ObjectId(campaignId)
         }, {
             $addToSet: { playerQueue: { $each: [candidate] } }
         }).exec();
+
+        const updatedCampaign = await this.campaignModel.findById(campaignId).exec();
+        if (!updatedCampaign) {
+            throw new Error('Campaign not found');
+        }
+
+        const user = updatedCampaign.playerQueue.find(player => player._id.toString() === candidate._id.toString());
         
-        return newCandidate
+        return user
     }
 
     public async deleteCandidate(campaignId: string, candidateId: string): Promise<UpdateWriteOpResult> {

@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  h1 {
+    @apply text-4xl underline w-full text-center my-16;
+  }
+  ul {
+    @apply m-4 flex flex-row gap-4 flex-wrap;
+  }
+  li {
+    @apply m-2;
+  }
+}

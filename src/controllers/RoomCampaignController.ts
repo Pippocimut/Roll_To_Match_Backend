@@ -3,6 +3,7 @@ import { CreateCampaignDTO, CreateCampaignZodSchema } from "../dto/CreateCampaig
 import { CampaignModel, PersistedCampaign } from "../database-models/Campaign";
 import { RoomModel } from "../database-models/Room";
 import { MongoDocument } from "../data-types";
+import CampaignAdapter from "../adapters/Campaign";
 
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 
@@ -63,7 +64,8 @@ async function createCampaign(req: Request, res: Response): Promise<void> {
 
         console.log("All good updating room")
 
-        res.redirect('/room/' + getRoom._id.toString());
+        const adaptedCampaign = CampaignAdapter.fromPersistedToReturnedCampaign(campaignCreated)
+        res.status(200).send(adaptedCampaign);
     } catch (err) {
         res.status(400).send(err);
     }

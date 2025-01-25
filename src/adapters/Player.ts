@@ -14,3 +14,7 @@ export function fromPersistedToReturnedPlayer(persistedPlayer: MongoDocument<Per
         email: persistedPlayer.email,
     }
 }
+
+export default {
+    fromPersistedToReturnedPlayer
+}

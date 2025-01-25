@@ -17,8 +17,8 @@ export class RoomController {
             }
 
             const createdRoom = await RoomModel.create(room);
-
-            res.redirect('/rooms');
+            const adaptedRoom = await fromPersistedToReturnedRoom(createdRoom)
+            res.status(200).send(adaptedRoom)
         } catch (err) {
             res.status(400).send(err);
         }
@@ -32,7 +32,7 @@ export class RoomController {
         const adaptedRooms = await Promise.all(rooms.map(async (room) => fromPersistedToReturnedRoom(room)));
         console.log(adaptedRooms)
 
-        res.render('pages/rooms', { rooms: adaptedRooms });
+        res.status(200).send(adaptedRooms)
     }
 
     public static getRoom = async (req: Request, res: Response) => {
@@ -41,7 +41,7 @@ export class RoomController {
         const room = await RoomModel.findById(roomId);
         const adaptedRoom = await fromPersistedToReturnedRoom(room);
 
-        res.render('pages/room', { room: adaptedRoom });
+        res.status(200).send(adaptedRoom)
     }
 
     public static updateRoom = updateRoom;
