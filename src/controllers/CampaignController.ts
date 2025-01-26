@@ -25,38 +25,63 @@ export class CampaignController {
     public async createCampaign(req: Request, res: Response): Promise<void> {
         try {
             const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
+            if (!req.user) {
+                res.status(401).send('Unauthorized');
+                return;
+            }
+            if (!req.params.id) {
+                res.status(400).send('Room ID not provided');
+                return;
+            }
             const userId = req.user._id.toString()
             const roomId = req.params.id
 
             const campaign = await this.campaignService.createCampaign(campaignDTO, roomId, userId)
             const adaptedCampaign = CampaignAdapter.fromPersistedToReturnedCampaign(campaign)
-            
+
             res.status(200).send(adaptedCampaign)
         } catch (err) {
-            this.CampaignControllerHandleError(err, res)
+            if (err instanceof Error) {
+                res.status(500).json({ error: err.message })
+                this.CampaignControllerHandleError(err, res)
+            }
         }
     }
 
     public getCampaigns = async (req: Request, res: Response): Promise<void> => {
         try {
+            if (!req.user) {
+                res.status(401).send('Unauthorized');
+                return;
+            }
             const userId = req.user._id.toString()
             const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
             res.status(200).send(adaptedCampaigns)
         } catch (err) {
-            this.CampaignControllerHandleError(err, res)
+            if (err instanceof Error) {
+                res.status(500).json({ error: err.message })
+                this.CampaignControllerHandleError(err, res)
+            }
         }
     }
 
     public getCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
+            if (!req.user) {
+                res.status(401).send('Unauthorized');
+                return;
+            }
             const userId = req.user._id.toString()
             const campaign = await this.campaignService.getCampaign(req.params.id)
             console.log(JSON.stringify(campaign))
             res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign))
         } catch (err) {
-            this.CampaignControllerHandleError(err, res)
+            if (err instanceof Error) {
+                res.status(500).json({ error: err.message })
+                this.CampaignControllerHandleError(err, res)
+            }
         }
     }
 
@@ -67,6 +92,11 @@ export class CampaignController {
             const campaign = await this.campaignService.getCampaign(req.params.id)
             const user = req.user
 
+            if (!user) {
+                res.status(401).send({ message: 'Unauthorized' })
+                return
+            }
+
             if (campaign.owner && campaign.owner.toString() !== user._id.toString()) {
                 res.status(401).send({ message: 'Unauthorized' })
                 return
@@ -76,7 +106,10 @@ export class CampaignController {
             res.status(200).send(campaignUpdateResult);
         }
         catch (err) {
-            this.CampaignControllerHandleError(err, res)
+            if (err instanceof Error) {
+                res.status(500).json({ error: err.message })
+                this.CampaignControllerHandleError(err, res)
+            }
         }
     }
 
@@ -85,6 +118,11 @@ export class CampaignController {
         try {
             const campaign = await this.campaignService.getCampaign(req.params.id)
             const user = req.user
+
+            if (!user) {
+                res.status(401).send({ message: 'Unauthorized' })
+                return
+            }
 
             if (campaign.owner && campaign.owner.toString() !== user.id) {
                 res.status(401).send({ message: 'Unauthorized' })
@@ -95,7 +133,10 @@ export class CampaignController {
             res.status(200).send(campaignUpdateResult);
         }
         catch (err) {
-            this.CampaignControllerHandleError(err, res)
+            if (err instanceof Error) {
+                res.status(500).json({ error: err.message })
+                this.CampaignControllerHandleError(err, res)
+            }
         }
     }
 

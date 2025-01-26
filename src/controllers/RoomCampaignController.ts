@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { CreateCampaignDTO, CreateCampaignZodSchema } from "../dto/CreateCampaignDTO";
 import { CampaignModel, PersistedCampaign } from "../database-models/Campaign";
 import { RoomModel } from "../database-models/Room";
-import { MongoDocument } from "../data-types";
+import { CampaignTags, MongoDocument } from "../data-types";
 import CampaignAdapter from "../adapters/Campaign";
 
 const { ObjectId, DocumentArray } = require('mongoose').Types;
@@ -32,6 +32,16 @@ async function createCampaign(req: Request, res: Response): Promise<void> {
         }
         
         const tags = campaignDTO.tags || []
+        if (tags.length > 0) {
+            const invalidTags = tags.filter(tag => !Object.values(CampaignTags).includes(tag))
+            if (invalidTags.length > 0) {
+                throw new Error('Invalid tags')
+            }
+        }
+        if (!req.user) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
         const owner = new ObjectId(req.user._id.toString())
         const room = new ObjectId(getRoom._id.toString())
 

@@ -3,6 +3,8 @@ import { PersistedRoom, RoomModel } from "../database-models/Room";
 import { CreateRoomZodSchema } from "../dto/CreateRoomDTO";
 import { fromPersistedToReturnedRoom } from "../adapters/Room";
 import mongoose from "mongoose"
+import { MongoDocument } from "data-types/temp";
+import { PersistedCampaign } from "database-models/Campaign";
 const { ObjectId, DocumentArray } = mongoose.Types;
 
 export class RoomController {
@@ -10,13 +12,17 @@ export class RoomController {
         try {
             const createRoomDTO = CreateRoomZodSchema.parse(req.body);
 
+            if (!req.user) {
+                res.status(401).send('Unauthorized');
+                return;
+            }
             const room: PersistedRoom = {
                 title: createRoomDTO.title,
                 owner: new ObjectId(req.user._id.toString()),
                 campaigns: []
             }
 
-            const createdRoom = await RoomModel.create(room);
+            const createdRoom = await RoomModel.create(room).then(async (room) => await room.populate<{ campaigns: MongoDocument<PersistedCampaign>[] }>('campaigns'));
             const adaptedRoom = await fromPersistedToReturnedRoom(createdRoom)
             res.status(200).send(adaptedRoom)
         } catch (err) {
@@ -26,9 +32,13 @@ export class RoomController {
     }
 
     public static getRooms = async (req: Request, res: Response) => {
+        if (!req.user) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
         const userId = req.user._id.toString();
 
-        const rooms = await RoomModel.find({ owner: userId }).populate('campaigns').exec();
+        const rooms = await RoomModel.find({ owner: userId }).populate<{ campaigns: MongoDocument<PersistedCampaign>[] }>('campaigns').exec();
         const adaptedRooms = await Promise.all(rooms.map(async (room) => fromPersistedToReturnedRoom(room)));
         console.log(adaptedRooms)
 
@@ -38,7 +48,12 @@ export class RoomController {
     public static getRoom = async (req: Request, res: Response) => {
         const roomId = req.params.id;
 
-        const room = await RoomModel.findById(roomId);
+        const room = await RoomModel.findById(roomId).populate<{ campaigns: MongoDocument<PersistedCampaign>[] }>('campaigns').exec()
+
+        if (!room) {
+            res.status(404).send('Room not found');
+            return;
+        }
         const adaptedRoom = await fromPersistedToReturnedRoom(room);
 
         res.status(200).send(adaptedRoom)
@@ -58,6 +73,10 @@ export async function deleteRoom(req, res) {
     if (!getRoom) {
         return res.status(400).send({ message: 'Room does not exist' })
     }
+    if (!getRoom.owner) {
+        return res.status(400).send({ message: 'Room does not have an owner' })
+    }
+
     if (getRoom.owner.toString() !== req.userId.toString()) {
         return res.status(401).send({ message: 'Unauthorized' })
     }

@@ -2,12 +2,12 @@ import { z } from 'zod'
 import { RoomModel } from '../database-models/Room'
 
 export const UpdateCampaignZodSchema = z.object({
-    title: z.string(),
-    description: z.string(),
-    owner: z.string(),
-    room: z.string(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    owner: z.string().optional(),
+    room: z.string().optional(),
     location: z.string().optional(),
-    tags: z.array(z.string()).min(1),
+    tags: z.array(z.string()).min(1).optional(),
 }).refine(data => {
     const getRoom = RoomModel.findById(data.room)
     if (!getRoom) {

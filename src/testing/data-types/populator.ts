@@ -11,17 +11,21 @@ export abstract class Populator implements IPopulator {
     protected client: MongoClient;
     public static populatorCollection: string = "Populator";
 
-    protected static dependencies = []
+    protected static dependencies: typeof Populator.constructor[] = []
+    
     public constructor(databaseName: string, databaseURI: string) {
         this.databaseName = databaseName;
         this.databaseURI = databaseURI;
         this.client = new MongoClient(this.databaseURI);
     }
+ 
     public static getLevel(): number {
         let level = 1
+        //get ta list of the classes of the dependencies
+        const classes = this.dependencies.map(dep => dep.constructor) as typeof Populator[]
         
         if (this.dependencies.length > 0) {
-            const allLevels: number[] = this.dependencies.map(dep => dep.getLevel())
+            const allLevels: number[] = classes.map(dep => dep.getLevel())
             level = Math.max(...allLevels) + 1
         }
 

@@ -10,6 +10,7 @@
         "sourceMap": true,
         "outDir": "./built",
         "allowJs": true,
+        "strict": true,
         "target": "ES2024",
         "baseUrl": "./src",
         "paths": {

@@ -1,5 +1,3 @@
-import { CreateCampaignDTO, CreateCampaignZodSchema } from "@roll-to-match/dto";
-import { UpdateCampaignDTO, UpdateCampaignZodSchema } from "@roll-to-match/dto";
 import { SearchCampaignDTO, SearchCampaignZodSchema } from "@roll-to-match/dto";
 import { CampaignService } from "@roll-to-match/services";
 import CampaignAdapter from "../../adapters/Campaign";
@@ -22,8 +20,59 @@ export class PageCampaignController {
         this.campaignService = campaignService;
     }
 
+    public getRoomCampaigns = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            if (req.user === undefined) {
+                throw new Error('Unauthorized')
+            }
+            const userId = req.user._id.toString()
+            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
+
+            const searchParams = {
+                ...searchParamsDTO,
+                filter: {
+                    ...searchParamsDTO.filter,
+                    room: req.params.id
+                }
+            }
+
+            const campaigns = await this.campaignService.getCampaigns(searchParams)//, userCheckDTO.id)
+            const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
+            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: userId });
+        } catch (err) {
+            next(err)
+        }
+    }
+
+    public getMyCampaigns = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            if (req.user === undefined) {
+                throw new Error('Unauthorized')
+            }
+            const userId = req.user._id.toString()
+            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
+
+            const searchParams = {
+                ...searchParamsDTO,
+                filter: {
+                    ...searchParamsDTO.filter,
+                    owner: userId
+                }
+            }
+
+            const campaigns = await this.campaignService.getCampaigns(searchParams)//, userCheckDTO.id)
+            const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
+            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: userId });
+        } catch (err) {
+            next(err)
+        }
+    }
+
     public getCampaigns = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
+            if (req.user === undefined) {
+                throw new Error('Unauthorized')
+            }
             const userId = req.user._id.toString()
             const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
@@ -36,6 +85,9 @@ export class PageCampaignController {
 
     public getCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
+            if (req.user === undefined) {
+                throw new Error('Unauthorized')
+            }
             const userId = req.user._id.toString()
             const campaign = await this.campaignService.getCampaign(req.params.id)
             console.log(JSON.stringify(campaign))

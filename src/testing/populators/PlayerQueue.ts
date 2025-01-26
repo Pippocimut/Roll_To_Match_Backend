@@ -20,7 +20,9 @@ export class CampaignPlayerQueuePopulator extends Populator {
 
             console.log("Database seeded with PlayerQueue! :)");
         } catch (err) {
-            console.log(err.stack);
+            if (err instanceof Error) {
+                console.log(err.stack);
+            }
             console.log("Error seeding database with PlayerQueue");
 
         } finally {
@@ -89,7 +91,9 @@ export class CampaignPlayerQueuePopulator extends Populator {
             console.log(result);
             console.log("Collection campaigns reset");
         } catch (err) {
-            console.log(err.stack);
+            if (err instanceof Error) {
+                console.log(err.stack);
+            }
         } finally {
             await this.client.close();
         }

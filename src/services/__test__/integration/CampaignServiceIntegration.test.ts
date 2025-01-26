@@ -7,6 +7,7 @@ import { describe, it } from "@jest/globals";
 import { getCreateCampaignDTO } from "@roll-to-match/dto-test/mock/MockCreateCampaignDTO"
 import { getMockCampaign } from "@roll-to-match/models-test/mock/MockCampaign";
 import 'dotenv/config';
+import { assertEnvVariables } from "util/assertEnvVariables";
 
 const { ObjectId } = require('mongoose').Types;
 
@@ -16,9 +17,20 @@ describe('CampaignService', () => {
     describe('integration tests', () => {
         const service = new CampaignService(CampaignModel);
         beforeAll(async () => {
-            await mongoose.connect(process.env.BARE_MONGO_URL, {
-                user: process.env.MONGO_USER,
-                pass: process.env.MONGO_PASS,
+            if (process.env === undefined) {
+                throw new Error('No env found')
+            }
+
+            const envVariables = assertEnvVariables([
+                'BARE_MONGO_URL',
+                'MONGO_USER',
+                'MONGO_PASS'
+            ])
+
+
+            await mongoose.connect(envVariables["BAR_MONGO_URL"], {
+                user: envVariables["MONGO_USER"],
+                pass: envVariables["MONGO_PASS"],
                 dbName: databaseName,
             })
         })
@@ -27,7 +39,16 @@ describe('CampaignService', () => {
             describe('and the data is valid', () => {
                 it('should create a campaign', async () => {
                     const room = await RoomModel.find({}).limit(1);
-                    const user = await UserModel.findOne(room[0].owner);
+                    if (room.length === 0) {
+                        throw new Error('No rooms found');
+                    }
+
+                    const user = await UserModel.findById(room[0].owner);
+
+                    if (!user) {
+                        throw new Error('No user found');
+                    }
+
                     const dto = getCreateCampaignDTO()
 
                     const campaignsInRoom = await RoomModel.deleteMany({ room: room[0]._id })
@@ -69,12 +90,14 @@ describe('CampaignService', () => {
                 }
 
 
+                const location = {
+                    type: "Point",
+                    coordinates: [searchParamsDTO.customFilter?.myLocation?.lat || 0, searchParamsDTO.customFilter?.myLocation?.lng || 0]
+                }
+
                 const createCampaign = await CampaignModel.create(getMockCampaign({
-                    tags: searchParamsDTO.filter.tags,
-                    location: {
-                        type: "Point",
-                        coordinates: [searchParamsDTO.customFilter.myLocation.lat, searchParamsDTO.customFilter.myLocation.lng]
-                    }
+                    tags: searchParamsDTO.filter?.tags || [],
+                    location: location
                 }))
 
                 const campaigns = await service.getCampaigns(searchParamsDTO);

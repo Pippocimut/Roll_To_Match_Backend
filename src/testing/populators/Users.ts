@@ -42,7 +42,9 @@ export class UserPopulator extends Populator {
 
             console.log("Database seeded with Users! :)");
         } catch (err) {
-            console.log(err.stack);
+            if (err instanceof Error) {
+                console.log(err.stack);
+            }
         } finally {
             await this.client.close();
         }
@@ -66,7 +68,9 @@ export class UserPopulator extends Populator {
             console.log("Users collection reset");
 
         } catch (err) {
-            console.log(err.stack);
+            if (err instanceof Error) {
+                console.log(err.stack);
+            }
         } finally {
             await this.client.close();
         }

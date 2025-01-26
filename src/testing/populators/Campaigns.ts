@@ -24,7 +24,9 @@ export class CampaignPopulator extends Populator {
 
             console.log("Database seeded with Campaigns! :)");
         } catch (err) {
-            console.log(err.stack);
+            if (err instanceof Error) {
+                console.log(err.stack);
+            }
             console.log("Error seeding database with Campaigns");
 
         } finally {
@@ -132,7 +134,10 @@ export class CampaignPopulator extends Populator {
             console.log(result);
             console.log("Collection campaigns reset");
         } catch (err) {
-            console.log(err.stack);
+            if (err instanceof Error) {
+
+                console.log(err.stack);
+            }
         } finally {
             await this.client.close();
         }

@@ -1,4 +1,6 @@
 import mongoose, { InferSchemaType } from 'mongoose';
+import { PersistedCampaign } from './Campaign';
+import { PersistedUser } from './User';
 
 const RoomSchema = new mongoose.Schema({
     title: {

@@ -25,7 +25,7 @@ export const SearchCampaignZodSchema = z.object({
     sortBy: z.array(z.enum(['title', 'registeredAt', 'location'])).optional(),
     limit: z.number().optional(),
 }).refine(data => {
-    if (data.sortBy && data.sortBy.includes("location") && !data.customFilter.myLocation) {
+    if (data.sortBy && data.sortBy.includes("location") && !data.customFilter?.myLocation) {
         return false
     }
     return true

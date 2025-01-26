@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%- include('../partials/header') %>
+<%- include('../partials/head') %>
     </head>
 
-    <body>
-        <h1>
-            All your rooms
-        </h1>
-        <%- include('../partials/room-card-list', { rooms: rooms }) %>
+    <%- include ('../partials/header') %>
 
-    </body>
+        <body>
+            <h1>
+                All your rooms
+            </h1>
+            <%- include('../partials/room-card-list', { rooms: rooms }) %>
 
-    <footer>
+        </body>
 
-    </footer>
+        <footer>
+
+        </footer>
 
 </html>

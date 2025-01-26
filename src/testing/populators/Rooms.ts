@@ -23,7 +23,9 @@ export class RoomPopulator extends Populator {
 
             console.log("Database seeded with Campaigns! :)");
         } catch (err) {
-            console.log(err.stack);
+            if (err instanceof Error) {
+                console.log(err.stack);
+            }
         } finally {
             await this.client.close();
         }
@@ -92,7 +94,9 @@ export class RoomPopulator extends Populator {
 
             console.log("Rooms collection reset");
         } catch (err) {
-            console.log(err.stack);
+            if (err instanceof Error) {
+                console.log(err.stack);
+            }
         } finally {
             await this.client.close();
         }

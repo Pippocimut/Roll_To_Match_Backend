@@ -10,7 +10,9 @@ import session from 'express-session'
 import MongoStore from 'connect-mongo'
 
 const authRouter = require('./routes/auth');
-const errorRouter = require('./routes/error');
+import apiRouter from './routes/api';
+import { assertEnvVariables } from 'util/assertEnvVariables';
+import { env } from 'process';
 const app = express();
 
 const PORT = process.env.PORT;
@@ -27,10 +29,19 @@ app.use((req, res, next) => {
     next();
 });
 
-mongoose.connect(process.env.BARE_MONGO_URL, {
-    user: process.env.MONGO_USER,
-    pass: process.env.MONGO_PASS,
-    dbName: process.env.DATABASE_NAME,
+const envVariable = assertEnvVariables([
+    'BARE_MONGO_URL',
+    'MONGO_USER',
+    'MONGO_PASS',
+    'DATABASE_NAME',
+])
+
+console.log(JSON.stringify(envVariable))
+
+mongoose.connect(envVariable["BARE_MONGO_URL"], {
+    user: envVariable["MONGO_USER"],
+    pass: envVariable["MONGO_PASS"],
+    dbName: envVariable["DATABASE_NAME"],
 }).then(() => {
     app.use(session({
         secret: process.env.SESSION_SECRET || 'your-secret-key',
@@ -45,10 +56,17 @@ mongoose.connect(process.env.BARE_MONGO_URL, {
         }
     }));
 
+    console.log('Connected to MongoDB');
     app.use('/auth', authRouter);
+    console.log('Created auth routes');
     app.use(onlyAuthorizedUsers);
+    console.log('Added auth middleware');
     app.use('/', indexRoutes);
+    console.log('Added index routes');
+    app.use('/api/v1', apiRouter)
+    console.log('Added api routes');
     app.use(errorHandler);
+    console.log('Added error handler');
 
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);

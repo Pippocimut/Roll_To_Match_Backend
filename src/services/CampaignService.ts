@@ -1,14 +1,31 @@
 import { CampaignModel, PersistedCampaign } from "../database-models/Campaign";
 import { CreateCampaignDTO } from "../dto/CreateCampaignDTO";
-import { SearchCampaignDTO } from "../dto/SearchCampaignDTO";
 import { UpdateCampaignDTO } from "../dto/UpdateCampaignDTO";
 import { MongoDocument } from "../data-types";
 
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 
+export type CampaignSearchParams = {
+    limit?: number;
+    sortBy?: string[];
+    customFilter?: {
+        myLocation?: {
+            lat: number;
+            lng: number;
+            radius: number;
+        }
+    },
+    filter?: {
+        room?: string;
+        owner?: string;
+        tags?: string[];
+    }
+
+}
+
 export interface ICampaignService {
     createCampaign(campaignDTO: CreateCampaignDTO, roomId: string, ownerId: string): Promise<MongoDocument<PersistedCampaign>>;
-    getCampaigns(searchParamsDTO: SearchCampaignDTO): Promise<MongoDocument<PersistedCampaign>[]>;
+    getCampaigns(searchParamsDTO: CampaignSearchParams): Promise<MongoDocument<PersistedCampaign>[]>;
     getCampaign(campaignId: string): Promise<MongoDocument<PersistedCampaign>>
     updateCampaign(campaignId: string, campaignDTO: UpdateCampaignDTO): Promise<MongoDocument<PersistedCampaign>>
     deleteCampaign(campaignId: string): Promise<MongoDocument<PersistedCampaign>>
@@ -23,16 +40,21 @@ export class CampaignService implements ICampaignService {
     }
 
     public async createCampaign(campaignDTO: CreateCampaignDTO, roomId: string, ownerId: string): Promise<MongoDocument<PersistedCampaign>> {
+
+        const location = {
+            type: "Point",
+            coordinates: [campaignDTO.location?.lat || 0, campaignDTO.location?.lng || 0]
+        }
+
+        const tags = campaignDTO.tags || [];
+
         const campaign: PersistedCampaign = {
             title: campaignDTO.title,
             description: campaignDTO.description,
             owner: new ObjectId(ownerId),
             room: new ObjectId(roomId),
-            location: {
-                type: "Point",
-                coordinates: [campaignDTO.location.lat, campaignDTO.location.lng]
-            },
-            tags: campaignDTO.tags,
+            location: location,
+            tags: tags,
             registeredAt: new Date(),
             reviews: new DocumentArray([]),
             playerQueue: new DocumentArray([]),
@@ -43,8 +65,8 @@ export class CampaignService implements ICampaignService {
         return campaignCreated;
     }
 
-    public async getCampaigns(searchParamsDTO: SearchCampaignDTO, userId?: string): Promise<MongoDocument<PersistedCampaign>[]> {
-        const pipeline = []
+    public async getCampaigns(searchParamsDTO: CampaignSearchParams, userId?: string): Promise<MongoDocument<PersistedCampaign>[]> {
+        const pipeline: any = []
 
         if (searchParamsDTO.customFilter && searchParamsDTO.customFilter.myLocation) {
             pipeline.push({
@@ -68,6 +90,12 @@ export class CampaignService implements ICampaignService {
                         tags: { $in: searchParamsDTO.filter.tags }
                     }
                 })
+            }
+            if (searchParamsDTO.filter.owner) {
+                filter["owner"] = new ObjectId(searchParamsDTO.filter.owner)
+            }
+            if (searchParamsDTO.filter.room) {
+                filter["room"] = new ObjectId(searchParamsDTO.filter.room)
             }
         }
         if (searchParamsDTO.customFilter) {
@@ -125,11 +153,17 @@ export class CampaignService implements ICampaignService {
 
     public async updateCampaign(campaignId: string, campaignDTO: UpdateCampaignDTO): Promise<MongoDocument<PersistedCampaign>> {
         const updatedCampaign = await CampaignModel.findByIdAndUpdate(campaignId, campaignDTO, { new: true });
+        if (!updatedCampaign || updatedCampaign === null) {
+            throw new Error('Campaign not found');
+        }
         return updatedCampaign;
     }
 
     public async deleteCampaign(campaignId: string): Promise<MongoDocument<PersistedCampaign>> {
         const deleted = await CampaignModel.findByIdAndDelete(campaignId);
+        if (!deleted || deleted === null) {
+            throw new Error('Campaign not found');
+        }
         return deleted;
     }
 }

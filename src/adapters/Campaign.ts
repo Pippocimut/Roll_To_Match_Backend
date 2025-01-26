@@ -22,7 +22,6 @@ export type AdaptedCampaign = {
 }
 
 function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<PersistedCampaign>): AdaptedCampaign {
-
     const playerQueue = persistedCampaign.playerQueue.map(player => fromPersistedToReturnedPlayer(player))
     const activePlayers = persistedCampaign.activePlayers.map(player => fromPersistedToReturnedPlayer(player))
 

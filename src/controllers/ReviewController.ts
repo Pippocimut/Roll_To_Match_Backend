@@ -15,6 +15,10 @@ export class ReviewController {
 
 async function createReview(req: Request, res: Response): Promise<void> {
     const campaignId = req.params.campaignId
+    if (!req.user) {
+        res.status(401).send('Unauthorized')
+        return
+    }
     const userId = req.user._id.toString()
     const createReviewDTO: CreateReviewDTO = CreateReviewZodSchema.parse(req.body)
     const { title, message, stars } = createReviewDTO
@@ -66,6 +70,10 @@ async function getReview(req: Request, res: Response): Promise<void> {
 async function updateReview(req: Request, res: Response): Promise<void> {
     const reviewId = req.params.reviewId
     const campaignId = req.params.campaignId
+    if (!req.user) {
+        res.status(401).send('Unauthorized')
+        return
+    }
     const userId = req.user._id.toString()
     const updateReviewDTO: UpdateReviewDTO = UpdateReviewZodSchema.parse(req.body)
     const { title, message, stars } = updateReviewDTO
@@ -100,6 +108,10 @@ async function updateReview(req: Request, res: Response): Promise<void> {
 async function deleteReview(req: Request, res: Response): Promise<void> {
     const reviewId = req.params.reviewId
     const campaignId = req.params.campaignId
+    if (!req.user) {
+        res.status(401).send('Unauthorized')
+        return
+    }
     const userId = req.user._id.toString()
 
     const campaign = await CampaignModel.findById(campaignId)

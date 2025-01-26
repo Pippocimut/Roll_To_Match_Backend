@@ -1,4 +1,8 @@
 <div id="campaign-card">
+    <script type="module">
+        import { createRemoveButton } from '/js/createRemoveButton.js';
+        window.createRemoveButton = createRemoveButton;
+    </script>
     <h2>
         <%= campaign.name %>
     </h2>
@@ -13,7 +17,6 @@
     <h3>
         Player Queue
     </h3>
-    <%- include('./remove-candidate') %>
     <ul id="player-queue">
         <% campaign.playerQueue.forEach(player=> { %>
             <li>
@@ -65,9 +68,9 @@
                             const newPlayer = document.createElement('li')
                             newPlayer.textContent = response.username
 
-                            const removeButton = createRemoveButton('<%= campaign.id %>',  response.id )
+                            const removeButton = createRemoveButton('<%= campaign.id %>', response.id)
                             newPlayer.appendChild(removeButton)
-                            
+
                             playerQueue.appendChild(newPlayer)
                         } else {
                             console.error('Errore nella richiesta:', await result.text())
@@ -80,4 +83,5 @@
         </script>
 
     </button>
+    <script src="/js/createRemoveButton.js" type="module"></script>
 </div>

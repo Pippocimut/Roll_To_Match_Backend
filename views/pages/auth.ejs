@@ -1,57 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%- include('../partials/header') %>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
+<%- include('../partials/head') %>
+    </head>
+    <%- include ('../partials/header') %>
 
-<body>
-    <div class="col-sm-4">
-        <div class="card">
-            <div class="card-body">
-                <a class="btn btn-block btn-social btn-google" href="/auth/google" role="button">
-                    <i class="fab fa-google"></i>
-                    Sign In with Google
-                </a>
-                <!-- <a class="btn btn-block btn-social btn-google" href="/auth/Facebook" role="button">
+        <body>
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body">
+                        <a class="btn btn-block btn-social btn-google" href="/auth/google" role="button">
+                            <i class="fab fa-google"></i>
+                            Sign In with Google
+                        </a>
+                        <!-- <a class="btn btn-block btn-social btn-google" href="/auth/Facebook" role="button">
                     <i class="fab fa-google"></i>
                     Sign In with Facebook
                 </a> -->
-            </div>
-            <div id="register">
-                <form action="/auth/register" method="post">
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-
-                        <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-
-                        <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </form>
-            </div>
-            <div id="login">
-                <form action="/auth/login" method="post">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                    <div id="register">
+                        <form action="/auth/register" method="post">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
 
-                        <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
+                    <div id="login">
+                        <form action="/auth/login" method="post">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-</body>
+        </body>
 
-<footer>
+        <footer>
 
-</footer>
+        </footer>
 
 </html>

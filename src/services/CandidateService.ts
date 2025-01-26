@@ -34,6 +34,9 @@ export class CandidateService implements ICandidateService {
         }
 
         const user = updatedCampaign.playerQueue.find(player => player._id.toString() === candidate._id.toString());
+        if (!user) {
+            throw new Error('User not found');
+        }
         
         return user
     }
