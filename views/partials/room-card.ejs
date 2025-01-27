@@ -1,9 +1,9 @@
-<div id="room-card">
-    <form action="/room/<%= room.id %>" method="get">
-        <input type="hidden" name="roomId" value="<%= room.id %>">
-        <h2>
-            <%= room.title %>
-        </h2>
-        <input type="submit" value="See Room">
-    </form>
+<div id="room-card"
+    class="m-2 p-2 border-2 border-gray-200 rounded-lg bg-white w-1/4 flex flex-col justify-center items-center">
+    <p class="text-lg font-bold">
+        Room: <%= room.title %>
+    </p>
+    <button class="scale-95 hover:scale-100 transform transition duration-100 ease-in-out bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+        <a href="/room/<%= room.id %>">View Room</a>
+    </button>
 </div>

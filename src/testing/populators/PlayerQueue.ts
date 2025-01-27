@@ -60,6 +60,7 @@ export class CampaignPlayerQueuePopulator extends Populator {
                 for (const user of users) {
                     campaign.playerQueue.push(user._id);
                     playerQueueCreated++;
+                    console.log(`PlayerQueue ${playerQueueCreated} created`);
                 }
 
                 if (playerQueueCreated >= toCreate) {

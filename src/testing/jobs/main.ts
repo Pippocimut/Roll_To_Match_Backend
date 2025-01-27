@@ -5,8 +5,6 @@ import { AllowedJobs } from "../data-types";
 async function main() {
     console.log("Starting job");
 
-    
-
     switch (process.argv[2]) {
         case AllowedJobs.populate:
             await populate(process.argv.slice(3));

@@ -1,10 +1,23 @@
-<header class="w-full flex justify-between bg-gray-800 text-white p-4 mb-4">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="/">Home</a>
-        <a class="navbar-brand" href="/rooms">Rooms</a>
-        <a class="navbar-brand" href="/create-room">New Room</a>
+<header class="flex flex-wrap justify-between items-center p-4 bg-gray-200">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light w-full flex justify-between text-2xl font-bold">
+        <div class="flex justify-between gap-4">
+            <a class="navbar-brand" href="/">Home</a>
+            <a class="navbar-brand" href="/rooms">Rooms</a>
+            <a class="navbar-brand" href="/campaigns">Campaigns</a>
+            <a class="navbar-brand" href="/create-room">Add Room</a>
+            <a class="navbar-brand" href="/create-campaign">Add Campaign</a>
+        </div>
+        <div class="flex justify-between gap-4">
+            <% if (locals.userId) { %>
 
-        <a class="navbar-brand" href="/auth/register">Register</a>
-        <a class="navbar-brand" href="/auh/login">Login</a>
+                <a class="navbar-brand" href="/auth/logout">Logout</a>
+
+                <% } else { %>
+
+                        <a class="navbar-brand" href="/auth/register">Register</a>
+                        <a class="navbar-brand" href="/auth/login">Login</a>
+
+                        <% } %>
+        </div>
     </nav>
 </header>

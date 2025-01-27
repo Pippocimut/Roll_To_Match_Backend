@@ -8,11 +8,16 @@ export async function auth(req, res, next) {
         if (!secretToken) {
             return res.status(400).send({ message: 'Secret token not found' })
         }
-        const verified = verify(req.session.accessToken, secretToken)
-        if (verified && typeof verified === 'object' && 'id' in verified) {
-            req.user = await UserModel.findById(verified.id)
-            return next()
+        try {
+            const verified = verify(req.session.accessToken, secretToken)
+            if (verified && typeof verified === 'object' && 'id' in verified) {
+                req.user = await UserModel.findById(verified.id)
+                return next()
+            }
+        } catch (error) {
+            return res.status(401).send({ message: 'Access denied' })
         }
+
         return res.status(401).send({ message: 'Access denied' })
     }
     return res.status(401).send({ message: 'Access denied' })

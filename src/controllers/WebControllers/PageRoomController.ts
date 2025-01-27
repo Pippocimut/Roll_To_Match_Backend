@@ -15,6 +15,15 @@ export class PageRoomController {
     }
 
     public getRooms = async (req: Request, res: Response) => {
+
+        const rooms = await RoomModel.find().populate<{ campaigns: MongoDocument<PersistedCampaign>[] }>('campaigns').exec();
+        const adaptedRooms = await Promise.all(rooms.map(async (room) => fromPersistedToReturnedRoom(room)));
+        console.log(adaptedRooms)
+
+        res.render('pages/rooms', { rooms: adaptedRooms });
+    }
+
+    public getMyRooms = async (req: Request, res: Response) => {
         if (!req.user) {
             res.status(401).send('Unauthorized');
             return;

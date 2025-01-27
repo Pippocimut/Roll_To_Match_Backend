@@ -12,7 +12,7 @@ export class CampaignPopulator extends Populator {
     public static populatorCollection = "campaign";
     static dependencies = [RoomPopulator, RoomPopulator]
 
-    public async seedDB(recordsN = 100): Promise<void> {
+    public async seedDB(recordsN = 300): Promise<void> {
         try {
             await this.client.connect();
             console.log("Connected correctly to server");
@@ -78,6 +78,13 @@ export class CampaignPopulator extends Populator {
 
                     campaignCreated += randomNumberForCampaigns;
                     await campaignCollection.insertMany(toCreateCampaigns);
+
+                    const campaignsInRoom = await campaignCollection.find({ room: room._id }).toArray();
+                    if (!campaignsInRoom) {
+                        continue;
+                    }
+
+                    await roomCollection.updateOne({ _id: room._id }, { $set: { campaigns: campaignsInRoom.map(campaign => campaign._id) } });
 
                     if (campaignCreated >= toCreate) {
                         return campaignCreated;

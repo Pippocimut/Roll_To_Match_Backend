@@ -1,5 +1,6 @@
 import { IPopulator } from '../data-types';
 import CampaignPopulator from './Campaigns';
+import { CampaignPlayerQueuePopulator } from './PlayerQueue';
 import RoomPopulator from './Rooms';
 import UserPopulator from './Users';
 
@@ -7,11 +8,12 @@ const PopulatorList = [
     CampaignPopulator,
     UserPopulator,
     RoomPopulator,
+    CampaignPlayerQueuePopulator
 ]
 
 class PopulatorInitializer {
     private static populatorList = PopulatorList;
-    
+
     public static initialize(populatorName: string, database_name: string, mongo_uri: string): IPopulator | null {
         const populator = this.populatorList.find((Populator) => Populator.populatorCollection.toLocaleLowerCase() === populatorName.toLocaleLowerCase());
         const names = this.populatorList.map((Populator) => Populator.name);
