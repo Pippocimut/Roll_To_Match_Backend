@@ -39,5 +39,9 @@ router.post('/login', AuthController.getInstance().loginLocalUser);
 
 router.get("/login", (req, res) => { res.render("pages/auth") });
 router.get("/register", (req, res) => { res.render("pages/auth") });
+router.get("/logout", (req: Request, res) => {
+    req.session.destroy(() => { });
+    res.redirect("/auth/login");
+});
 
 module.exports = router

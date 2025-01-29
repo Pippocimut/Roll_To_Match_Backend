@@ -12,6 +12,7 @@ export async function auth(req, res, next) {
             const verified = verify(req.session.accessToken, secretToken)
             if (verified && typeof verified === 'object' && 'id' in verified) {
                 req.user = await UserModel.findById(verified.id)
+                res.locals.user = req.user
                 return next()
             }
         } catch (error) {

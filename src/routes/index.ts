@@ -11,10 +11,10 @@ router.get('/campaign/:id', PageCampaignController.getInstance().getCampaign);
 router.get('/campaigns', PageCampaignController.getInstance().getCampaigns);
 router.get('/rooms', PageRoomController.getInstance().getRooms);
 router.get('/room/:id', PageRoomController.getInstance().getRoom);
-router.get('/room/:id/campaigns',PageCampaignController.getInstance().getRoomCampaigns);
+router.get('/room/:id/campaigns', PageCampaignController.getInstance().getRoomCampaigns);
 
 router.get('/me/campaigns', PageCampaignController.getInstance().getMyCampaigns);
 router.get('/me/rooms', PageRoomController.getInstance().getMyRooms);
-router.get('/me', (req, res) => { res.render('pages/my'); });
+router.get('/me', (req, res) => { res.render('pages/me/profile'); });
 
 export default router;

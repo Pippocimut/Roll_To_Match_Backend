@@ -5,12 +5,13 @@ import 'dotenv/config';
 import { Populator } from '../data-types/populator';
 import { CampaignTags } from '../../data-types/temp'
 import RoomPopulator from './Rooms';
+import UserPopulator from './Users';
 
 const { DocumentArray } = mongoose.Types;
 
 export class CampaignPopulator extends Populator {
     public static populatorCollection = "campaign";
-    static dependencies = [RoomPopulator, RoomPopulator]
+    static dependencies = [UserPopulator, RoomPopulator]
 
     public async seedDB(recordsN = 300): Promise<void> {
         try {
@@ -22,6 +23,7 @@ export class CampaignPopulator extends Populator {
                 campaignCreated += await this.populate(recordsN - campaignCreated);
             }
 
+            
             console.log("Database seeded with Campaigns! :)");
         } catch (err) {
             if (err instanceof Error) {
