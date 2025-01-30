@@ -15,11 +15,7 @@ export async function auth(req, res, next) {
                 res.locals.user = req.user
                 return next()
             }
-        } catch (error) {
-            return res.status(401).send({ message: 'Access denied' })
-        }
-
-        return res.status(401).send({ message: 'Access denied' })
+        } catch (e) { }
     }
-    return res.status(401).send({ message: 'Access denied' })
+    return res.redirect('/auth/login')
 }
