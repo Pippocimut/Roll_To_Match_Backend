@@ -1,7 +1,7 @@
 
 import { Router } from 'express';
 import { CampaignController } from '../controllers/CampaignController';
-//import { CampaignPlayerController } from '../controllers/CampaignPlayerController';
+import { CampaignPlayerController } from '../controllers/CampaignPlayerController';
 import { RoomCampaignController } from '../controllers/RoomCampaignController';
 import { RoomController } from '../controllers/RoomController';
 import { ReviewController } from '../controllers/ReviewController';
@@ -35,7 +35,7 @@ router.get('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.
 router.get('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getCandidatePlayer);
 router.delete('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getInstance().deleteCandidatePlayer);
 
-// router.post('/campaign/:campaignId/player', CampaignPlayerController.createPlayer);
+router.post('/campaign/:campaignId/player/:playerId', CampaignPlayerController.createPlayer);
 // router.get('/campaign/:campaignId/players', CampaignPlayerController.getPlayers);
 // router.get('/campaign/:campaignId/player/:playerId', CampaignPlayerController.getPlayer);
 // router.delete('/campaign/:campaignId/player/:playerId', CampaignPlayerController.deletePlayer);

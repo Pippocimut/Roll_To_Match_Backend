@@ -1,6 +1,8 @@
 <div id="campaign-card">
     <script type="module">
         import { createRemoveButton } from '/js/createRemoveButton.js';
+        import { createAcceptPlayerToCampaignButton } from '/js/createAcceptPlayerToCampaignButton.js';
+        window.createAcceptPlayerToCampaignButton = createAcceptPlayerToCampaignButton;
         window.createRemoveButton = createRemoveButton;
     </script>
     <h2>
@@ -22,7 +24,12 @@
             <li>
                 <%= player.username %>
                     <%= player.id %>
-                        <% if(userId.toString()===player.id.toString()) { %>
+                        <% if(userId.toString()===player.id.toString() || campaign.owner.toString()===userId.toString())
+                            { %>
+                            <script>
+                                const acceptButton = createAcceptPlayerToCampaignButton('<%= campaign.id %>', '<%= player.id %>')
+                                document.currentScript.parentElement.appendChild(acceptButton)
+                            </script>
                             <script>
                                 const removeButtonQueue = createRemoveButton('<%= campaign.id %>', '<%= player.id %>')
                                 document.currentScript.parentElement.appendChild(removeButtonQueue)
@@ -31,6 +38,9 @@
             </li>
             <% }) %>
     </ul>
+    <h3>
+        Active Players
+    </h3>
     <ul>
         <% campaign.activePlayers.forEach(player=> { %>
             <li>
