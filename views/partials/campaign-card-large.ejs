@@ -2,6 +2,8 @@
     <script type="module">
         import { createRemoveButton } from '/js/createRemoveButton.js';
         import { createAcceptPlayerToCampaignButton } from '/js/createAcceptPlayerToCampaignButton.js';
+        import { createJoinCampaignButton } from '/js/createJoinCampaignButton.js';
+        window.createJoinCampaignButton = createJoinCampaignButton;
         window.createAcceptPlayerToCampaignButton = createAcceptPlayerToCampaignButton;
         window.createRemoveButton = createRemoveButton;
     </script>
@@ -21,20 +23,10 @@
     </h3>
     <ul id="player-queue">
         <% campaign.playerQueue.forEach(player=> { %>
-            <li>
-                <%= player.username %>
-                    <%= player.id %>
-                        <% if(userId.toString()===player.id.toString() || campaign.owner.toString()===userId.toString())
-                            { %>
-                            <script>
-                                const acceptButton = createAcceptPlayerToCampaignButton('<%= campaign.id %>', '<%= player.id %>')
-                                document.currentScript.parentElement.appendChild(acceptButton)
-                            </script>
-                            <script>
-                                const removeButtonQueue = createRemoveButton('<%= campaign.id %>', '<%= player.id %>')
-                                document.currentScript.parentElement.appendChild(removeButtonQueue)
-                            </script>
-                            <% } %>
+            <li id="player-queue-item-<%=player.id%>">
+                <div class="button-container-<%=player.id%>">
+                    <%= player.username %> (<%= player.email %>)
+                </div>
             </li>
             <% }) %>
     </ul>
@@ -44,54 +36,52 @@
     <ul>
         <% campaign.activePlayers.forEach(player=> { %>
             <li>
-                <%= player.slug %>
-                    <%= player.email %>
-                        <%= player.id %>
-                            <%= player.username %>
-                                <script>
-                                    const removeButtonActive = createRemoveButton(<%= campaign.id %>, <%= player.id %>)
-                                    document.currentScript.parentElement.appendChild(removeButtonActive)
-                                </script>
+                <%= player.username %> (<%= player.email %>)
             </li>
             <% }) %>
     </ul>
-    <button id="join-campaign-button">
-        Join Campaign
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const button = document.getElementById('join-campaign-button')
-                button.addEventListener('click', async (e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
+    <div class="join-campaign-button-container">
+    </div>
 
-                    try {
-                        const result = await fetch('/api/v1/campaign/<%= campaign.id %>/candidate', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        })
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded and parsed');
+            // Player Queue Buttons
+            <% campaign.playerQueue.forEach(player => { %>
+                <% if (userId.toString() === player.id.toString() || campaign.owner.toString() === userId.toString()) { %>
+                    const container<%=player.id %> = document.querySelector('.button-container-<%=player.id%>');
+                    const removeButtonQueue<%=player.id %> = createRemoveButton('<%=campaign.id%>', '<%=player.id%>');
+                    const acceptButton<%=player.id %> = createAcceptPlayerToCampaignButton('<%=campaign.id%>', '<%=player.id%>');
+                    container<%=player.id %>.appendChild(acceptButton<%=player.id %>);
+                    container<%=player.id %>.appendChild(removeButtonQueue<%=player.id %>);
+                <% } %>
+                <%if (campaign.owner.toString() === userId.toString()) {%>
+                    console.log('Owner is <%=userId%>');
+                    const acceptButton<%=player.id %> = createAcceptPlayerToCampaignButton('<%=campaign.id%>', '<%=player.id%>');
+                    container<%=player.id %>.appendChild(acceptButton<%=player.id %>);
+                <%}%>
+            <% }) %>
 
-                        if (result.ok) {
-                            const response = await result.json()
-                            const playerQueue = document.getElementById('player-queue')
-                            const newPlayer = document.createElement('li')
-                            newPlayer.textContent = response.username
+            // Active Players Buttons
+            <% campaign.activePlayers.forEach(player => { %>
+                const activeContainer<%=player.id %> = document.querySelector('.active-button-container-<%=player.id%>');
+                        const removeButtonActive<%=player.id %> = createRemoveButton('<%=campaign.id%>', '<%=player.id%>');
+                        activeContainer<%=player.id %>.appendChild(removeButtonActive<%=player.id %>);
+            <% }) %>
 
-                            const removeButton = createRemoveButton('<%= campaign.id %>', response.id)
-                            newPlayer.appendChild(removeButton)
+            // Join Campaign Button
+            
+            <%if (!campaign.playerQueue.some(player => player.id.toString() === userId.toString()) && !campaign.activePlayers.some(player => player.id.toString() === userId.toString())) {%>
+                const joinButtonContainer = document.querySelector('.join-campaign-button-container');
+                const joinButton = createJoinCampaignButton('<%=campaign.id%>');
+                console.log('Join Button', joinButton);
+                console.log('Join Button Container', joinButtonContainer);
+                joinButtonContainer.appendChild(joinButton);
+            <%}%>
+        });
+    </script>
 
-                            playerQueue.appendChild(newPlayer)
-                        } else {
-                            console.error('Errore nella richiesta:', await result.text())
-                        }
-                    } catch (error) {
-                        console.error('Errore nella richiesta:', error)
-                    }
-                })
-            })
-        </script>
-
-    </button>
-    <script src="/js/createRemoveButton.js" type="module"></script>
 </div>
+
+
+<!-- Scripts at bottom -->

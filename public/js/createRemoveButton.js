@@ -25,6 +25,5 @@ export const createRemoveButton = (campaignId, playerId) => {
             console.error('Errore nella richiesta:', error);
         }
     });
-
     return button;
 }

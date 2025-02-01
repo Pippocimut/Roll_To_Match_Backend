@@ -1,20 +1,21 @@
 <div id="room-card">
+
+    <h2>
+        <%= room.title %>
+    </h2>
+    <ul>
+        <% room.campaigns.forEach(campaign=> { %>
+            <li>
+                <% JSON.stringify(campaign) %>
+                    <%= campaign.title %>
+                        <button>
+                            <a href="/campaign/<%= campaign.id %>">View</a>
+                        </button>
+            </li>
+            <% }) %>
+    </ul>
     <form action="/create-campaign/<%= room.id %>" method="get">
         <input type="hidden" name="roomId" value="<%= room.id %>">
-        <h2>
-            <%= room.title %>
-        </h2>
-        <ul>
-            <% room.campaigns.forEach(campaign=> { %>
-                <li>
-                    <% JSON.stringify(campaign) %>
-                    <%= campaign.title %>
-                    <button>
-                        <a href="/campaign/<%= campaign.id %>">View</a>
-                    </button>
-                </li>
-                <% }) %>
-        </ul>
 
         <input type="submit" value="Create Campaign">
     </form>

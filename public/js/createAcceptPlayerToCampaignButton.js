@@ -25,6 +25,6 @@ export const createAcceptPlayerToCampaignButton = (campaignId, playerId) => {
             console.error('Errore nella richiesta:', error);
         }
     });
-
+    console.log('button', button);
     return button;
 }
