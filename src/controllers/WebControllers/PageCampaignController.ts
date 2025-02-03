@@ -38,7 +38,7 @@ export class PageCampaignController {
 
             const campaigns = await this.campaignService.getCampaigns(searchParams)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: userId });
+            res.status(200).render('pages/campaigns', { campaigns: adaptedCampaigns, userId: userId });
         } catch (err) {
             next(err)
         }
@@ -62,7 +62,7 @@ export class PageCampaignController {
 
             const campaigns = await this.campaignService.getCampaigns(searchParams)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: userId });
+            res.status(200).render('pages/campaigns', { campaigns: adaptedCampaigns, userId: userId });
         } catch (err) {
             next(err)
         }
@@ -77,7 +77,7 @@ export class PageCampaignController {
             const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).render('pages/index', { campaigns: adaptedCampaigns, userId: userId });
+            res.status(200).render('pages/campaigns', { campaigns: adaptedCampaigns, userId: userId });
         } catch (err) {
             next(err)
         }

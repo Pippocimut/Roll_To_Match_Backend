@@ -16,13 +16,7 @@ export const createJoinCampaignButton = (campaignId) => {
             });
 
             if (result.ok) {
-                const response = await result.json();
-                const playerQueue = document.getElementById('player-queue');
-                const newPlayer = document.createElement('li');
-                newPlayer.textContent = response.username;
-                const removeButton = createRemoveButton(campaignId, response.id);
-                newPlayer.appendChild(removeButton);
-                playerQueue.appendChild(newPlayer);
+                window.location.reload();
             }
         } catch (error) {
             console.error('Error:', error);

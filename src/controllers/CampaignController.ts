@@ -55,7 +55,9 @@ export class CampaignController {
                 return;
             }
             const userId = req.user._id.toString()
-            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
+            const query = JSON.parse(new URLSearchParams(req.query))
+            console.log(query)
+            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(query)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
             res.status(200).send(adaptedCampaigns)

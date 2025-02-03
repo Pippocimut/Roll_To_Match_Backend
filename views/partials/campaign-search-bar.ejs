@@ -1,0 +1,44 @@
+<div id="searchbar" class="w-full flex justify-center items-center flex-col">
+    <form action="/campaigns" method="GET" class="flex justify-center items-center flex-col gap-4">
+        <input type="text" name="search" placeholder="Search for campaigns">
+        <!-- Start after this date-->
+        <input type="date" name="start">
+        <!-- End before this date-->
+        <input type="date" name="end">
+        <!-- Maximum number of players-->
+        <input type="number" name="maxPlayers" placeholder="Max Players">
+        <!-- Minimum number of players-->
+        <input type="number" name="minPlayers" placeholder="Min Players">
+        <!-- Where the campaign is located-->
+        <%- include('../partials/location') %>
+            <button type="submit">Search</button>
+    </form>
+    <script>
+        //override the button click to submit the form and reshape the inputs to an object that is easier to work with
+        document.querySelector('#searchbar form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const searchParams = new URLSearchParams();
+
+            /* for (const pair of formData) {
+                //Omit all empty data
+                if (pair[1] === '') {
+                    continue;
+                }
+                searchParams.append(pair[0], pair[1]);
+            } */
+            if (document.getElementById('location').value) {
+                const location = JSON.parse(document.getElementById('location').value);
+                const customField = {
+                    myLocation: {
+                        lat: location.lat,
+                        lng: location.lng
+                    }
+                }
+                searchParams.append('customFilter', JSON.stringify(customField));
+            }
+            window.location.href = `/campaigns?${searchParams.toString()}`;
+        });
+    </script>
+</div>

@@ -15,9 +15,7 @@ export const createRemoveButton = (campaignId, playerId) => {
                 }
             });
             if (result.ok) {
-                const response = await result.json()
-                const parent = button.parentElement;
-                parent.remove();
+                window.location.reload();
             } else {
                 console.error('Errore nella richiesta:', await result.text())
             }

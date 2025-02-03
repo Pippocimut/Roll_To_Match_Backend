@@ -58,15 +58,10 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     console.log('Connected to MongoDB');
     app.use('/auth', authRouter);
-    console.log('Created auth routes');
     app.use(onlyAuthorizedUsers);
-    console.log('Added auth middleware');
     app.use('/', indexRoutes);
-    console.log('Added index routes');
     app.use('/api/v1', apiRouter)
-    console.log('Added api routes');
     app.use(errorHandler);
-    console.log('Added error handler');
 
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
