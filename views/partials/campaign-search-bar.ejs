@@ -31,14 +31,17 @@
             if (document.getElementById('location').value) {
                 const location = JSON.parse(document.getElementById('location').value);
                 const customField = {
-                    myLocation: {
-                        lat: location.lat,
-                        lng: location.lng
+                    customFilter: {
+                        myLocation: {
+                            lat: location.lat,
+                            lng: location.lng
+                        }
                     }
                 }
-                searchParams.append('customFilter', JSON.stringify(customField));
+                const urlParams = encodeURI(JSON.stringify(customField));
+                window.location.href = `/campaigns?${urlParams}`;
             }
-            window.location.href = `/campaigns?${searchParams.toString()}`;
+            //window.location.href = `/campaigns?${customField.toString()}`;
         });
     </script>
 </div>

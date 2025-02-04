@@ -74,7 +74,12 @@ export class PageCampaignController {
                 throw new Error('Unauthorized')
             }
             const userId = req.user._id.toString()
-            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(req.query)
+            const queryParam = req.query || '{}'
+            const keys = Object.keys(queryParam)
+            const query = JSON.parse(keys[0] || '{}')
+            console.log(query)
+            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(query)
+            console.log(searchParamsDTO)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
             res.status(200).render('pages/campaigns', { campaigns: adaptedCampaigns, userId: userId });

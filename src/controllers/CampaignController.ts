@@ -1,6 +1,7 @@
 import { CreateCampaignDTO, CreateCampaignZodSchema } from "../dto/CreateCampaignDTO";
 import { UpdateCampaignDTO, UpdateCampaignZodSchema } from "../dto/UpdateCampaignDTO";
 import { SearchCampaignDTO, SearchCampaignZodSchema } from "../dto/SearchCampaignDTO";
+import { Client } from "@googlemaps/google-maps-services-js"
 import { CampaignService } from "../services/CampaignService";
 import CampaignAdapter from "../adapters/Campaign";
 import { Request, Response } from "express";
@@ -55,12 +56,14 @@ export class CampaignController {
                 return;
             }
             const userId = req.user._id.toString()
-            const query = JSON.parse(new URLSearchParams(req.query))
+
+            const query = req.query
             console.log(query)
             const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(query)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).send(adaptedCampaigns)
+            res.status(200).send(adaptedCampaigns) 
+
         } catch (err) {
             if (err instanceof Error) {
                 res.status(500).json({ error: err.message })

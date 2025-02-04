@@ -13,7 +13,7 @@ export const SearchCampaignZodSchema = z.object({
         myLocation: z.object({
             lat: z.number(),
             lng: z.number(),
-            radius: z.number().default(10)
+            radius: z.number().default(10000)
         }).optional(),
         registeredBefore: z.date().optional(),
         registeredAfter: z.date().optional(),
