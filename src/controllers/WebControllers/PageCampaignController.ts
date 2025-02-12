@@ -1,7 +1,7 @@
 import { SearchCampaignDTO, SearchCampaignZodSchema } from "@roll-to-match/dto";
 import { CampaignService } from "@roll-to-match/services";
 import CampaignAdapter from "../../adapters/Campaign";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, query, Request, Response } from "express";
 import { CampaignModel } from "@roll-to-match/models";
 
 export class PageCampaignController {
@@ -31,7 +31,7 @@ export class PageCampaignController {
             const searchParams = {
                 ...searchParamsDTO,
                 filter: {
-                    ...searchParamsDTO.filter,
+                    location: searchParamsDTO.location || { lat: 0, lng: 0, radius: 10000 },
                     room: req.params.id
                 }
             }
@@ -55,7 +55,7 @@ export class PageCampaignController {
             const searchParams = {
                 ...searchParamsDTO,
                 filter: {
-                    ...searchParamsDTO.filter,
+                    location: searchParamsDTO.location || { lat: 0, lng: 0, radius: 10000 },
                     owner: userId
                 }
             }
@@ -74,11 +74,18 @@ export class PageCampaignController {
                 throw new Error('Unauthorized')
             }
             const userId = req.user._id.toString()
-            const queryParam = req.query || '{}'
-            const keys = Object.keys(queryParam)
-            const query = JSON.parse(keys[0] || '{}')
-            console.log(query)
-            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(query)
+            const queryParam = JSON.parse(JSON.stringify(req.query)) || '{}'
+            for (const key in queryParam) {
+                if (queryParam[key] === '') {
+                    delete queryParam[key]
+                } else {
+                    queryParam[key] = JSON.parse(JSON.stringify(queryParam[key]))
+                }
+            }
+
+            console.log(queryParam)
+
+            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(queryParam)
             console.log(searchParamsDTO)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)

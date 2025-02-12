@@ -6,21 +6,16 @@ import { MongoDocument } from "../data-types";
 const { ObjectId, DocumentArray } = require('mongoose').Types;
 
 export type CampaignSearchParams = {
-    limit?: number;
-    sortBy?: string[];
-    customFilter?: {
-        myLocation?: {
-            lat: number;
-            lng: number;
-            radius: number;
-        }
-    },
-    filter?: {
+    /* limit?: number;
+    sortBy?: string[]; */
+    lat?: number;
+    lng?: number;
+    radius: number;
+    /* filter?: {
         room?: string;
         owner?: string;
         tags?: string[];
-    }
-
+    } */
 }
 
 export interface ICampaignService {
@@ -68,7 +63,7 @@ export class CampaignService implements ICampaignService {
     public async getCampaigns(searchParamsDTO: CampaignSearchParams, userId?: string): Promise<MongoDocument<PersistedCampaign>[]> {
         const pipeline: any = []
 
-        if (searchParamsDTO.customFilter && searchParamsDTO.customFilter.myLocation) {
+        /* if (searchParamsDTO.customFilter && searchParamsDTO.customFilter.myLocation) {
             pipeline.push({
                 $geoNear: {
                     near: {
@@ -79,11 +74,11 @@ export class CampaignService implements ICampaignService {
                     spherical: true
                 }
             })
-        }
+        } */
 
         const filter = {}
 
-        if (searchParamsDTO.filter) {
+        /* if (searchParamsDTO.filter) {
             if (searchParamsDTO.filter.tags) {
                 pipeline.push({
                     $match: {
@@ -97,19 +92,17 @@ export class CampaignService implements ICampaignService {
             if (searchParamsDTO.filter.room) {
                 filter["room"] = new ObjectId(searchParamsDTO.filter.room)
             }
-        }
-        if (searchParamsDTO.customFilter) {
-            if (searchParamsDTO.customFilter.myLocation) {
-                pipeline.push({
-                    $match: {
-                        location: {
-                            $geoWithin: {
-                                $centerSphere: [[searchParamsDTO.customFilter.myLocation.lng, searchParamsDTO.customFilter.myLocation.lat], searchParamsDTO.customFilter.myLocation.radius / 3963.2]
-                            }
+        } */
+        if (searchParamsDTO.lat && searchParamsDTO.lng && searchParamsDTO.radius) {
+            pipeline.push({
+                $match: {
+                    location: {
+                        $geoWithin: {
+                            $centerSphere: [[searchParamsDTO.lng, searchParamsDTO.lat], searchParamsDTO.radius / 3963.2]
                         }
                     }
-                })
-            }
+                }
+            })
         }
 
         if (Object.keys(filter).length > 0) {
@@ -117,7 +110,7 @@ export class CampaignService implements ICampaignService {
         }
 
         const sort: any = {};
-        if (searchParamsDTO.sortBy) {
+       /*  if (searchParamsDTO.sortBy) {
             if (searchParamsDTO.sortBy.includes('location')) {
                 sort["distance"] = 1;
             }
@@ -127,16 +120,16 @@ export class CampaignService implements ICampaignService {
             if (searchParamsDTO.sortBy.includes('registeredAt')) {
                 sort["registeredAt"] = 1;
             }
-        }
+        } */
         sort["_id"] = 1; // Always include _id to ensure a consistent sort order
 
         if (Object.keys(sort).length > 0) {
             pipeline.push({ $sort: sort })
         }
 
-        if (searchParamsDTO.limit) {
+        /* if (searchParamsDTO.limit) {
             pipeline.push({ $limit: searchParamsDTO.limit })
-        }
+        } */
 
         let campaigns = await CampaignModel.aggregate(pipeline).exec()
 

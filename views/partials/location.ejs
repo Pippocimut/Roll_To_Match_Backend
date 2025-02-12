@@ -3,7 +3,8 @@
     async defer>
     </script>
 <input id="autocomplete" name="address" placeholder="Enter a location" type="text"></input>
-<input id="location" name="location" type="hidden"></input>
+<input id="lat" name="lat" type="hidden"></input>
+<input id="lng" name="lng" type="hidden"></input>
 <script>
     async function initAutocomplete() {
         const input = document.getElementById('autocomplete');
@@ -11,12 +12,11 @@
         const autocomplete = new google.maps.places.Autocomplete(input);
         autocomplete.addListener('place_changed', () => {
             const place = autocomplete.getPlace();
-            const locationField = document.getElementById('location');
+            const latField = document.getElementById('lat');
+            const lngField = document.getElementById('lng');
             if (place.geometry) {
-                locationField.value = JSON.stringify({
-                    lat: place.geometry.location.lat(),
-                    lng: place.geometry.location.lng()
-                });
+                latField.value = place.geometry.location.lat();
+                lngField.value = place.geometry.location.lng();
             }
         });
     }

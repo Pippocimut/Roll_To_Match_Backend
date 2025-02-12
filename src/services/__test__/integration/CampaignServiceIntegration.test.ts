@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { SearchCampaignDTO, UpdateCampaignDTO } from "@roll-to-match/dto";
+import { SearchCampaignDTO, SearchCampaignZodSchema, UpdateCampaignDTO } from "@roll-to-match/dto";
 import { RoomModel, UserModel, CampaignModel } from "@roll-to-match/models";
 import { CampaignService } from "@roll-to-match/services";
 import { CampaignTags } from "@roll-to-match/types";
@@ -78,13 +78,9 @@ describe('CampaignService', () => {
                     filter: {
                         tags: [CampaignTags.DND, CampaignTags.BOARDGAMES]
                     },
-                    customFilter: {
-                        myLocation: {
-                            lat: 0,
-                            lng: 0,
-                            radius: 1000
-                        }
-                    },
+                    lat: 0,
+                    lng: 0,
+                    radius: 1000,
                     sortBy: ["location"],
                     limit: 10
                 }
@@ -92,11 +88,10 @@ describe('CampaignService', () => {
 
                 const location = {
                     type: "Point",
-                    coordinates: [searchParamsDTO.customFilter?.myLocation?.lat || 0, searchParamsDTO.customFilter?.myLocation?.lng || 0]
+                    coordinates: [searchParamsDTO.lat || 0, searchParamsDTO.lng || 0]
                 }
 
                 const createCampaign = await CampaignModel.create(getMockCampaign({
-                    tags: searchParamsDTO.filter?.tags || [],
                     location: location
                 }))
 
@@ -110,7 +105,8 @@ describe('CampaignService', () => {
             })
             it('should return a list of campaigns without a DTO', async () => {
                 const createCampaign = await CampaignModel.create(getMockCampaign({}))
-                const campaigns = await service.getCampaigns({});
+                const searchParams = SearchCampaignZodSchema.parse({})
+                const campaigns = await service.getCampaigns(searchParams);
 
                 expect(campaigns).toBeDefined();
                 expect(campaigns.length).toBeGreaterThanOrEqual(1);
