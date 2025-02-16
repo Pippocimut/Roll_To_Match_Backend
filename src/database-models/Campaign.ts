@@ -13,6 +13,7 @@ export interface PersistedCampaign {
         type: string;
         coordinates: number[];
     };
+    game: string;
     tags: string[];
     registeredAt: Date;
     reviews: any[];
@@ -33,6 +34,12 @@ export const CampaignSchema = new mongoose.Schema<PersistedCampaign>({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room',
         required: false
+    },
+    game: {
+        type: String,
+        enum: ['D&D', 'Pathfinder', 'Boardgames', 'Other'],
+        default: 'D&D',
+        required: true
     },
     reviews: [{
         type: ReviewSchema,

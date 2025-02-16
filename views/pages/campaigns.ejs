@@ -2,19 +2,22 @@
 <html lang="en">
 
 <%- include('../partials/head') %>
-    </head>
+  </head>
 
-    <%- include ('../partials/header') %>
-<body>
-  <h1>
-    This is a Roll To Match Page
-  </h1>
-  <%- include ('../partials/campaign-search-bar') %>
-  <%- include('../partials/campaign-list',{campaigns:campaigns}) %>
-</body>
+  <%- include ('../partials/header') %>
 
-<footer>
+    <body>
+      <h1>
+        Search your perfect team!
+      </h1>
+      <%- include ('../partials/campaign-search-bar') %>
+        <script>
+        </script>
+        <%- include('../partials/campaign-list',{campaigns:campaigns, searchParams: searchParams}) %>
+    </body>
 
-</footer>
+    <footer>
+
+    </footer>
 
 </html>

@@ -1,6 +1,5 @@
 import { CampaignTags } from "@roll-to-match/types";
 import { CreateCampaignDTO } from "@roll-to-match/dto";
-const { ObjectId } = require('mongoose').Types;
 
 export function getCreateCampaignDTO(createCampaignDTO?: Partial<CreateCampaignDTO>): CreateCampaignDTO {
     return {
@@ -10,6 +9,7 @@ export function getCreateCampaignDTO(createCampaignDTO?: Partial<CreateCampaignD
             lat: 0,
             lng: 0
         },
+        game: "D&D",
         tags: [CampaignTags.DND],
         ...createCampaignDTO
     }

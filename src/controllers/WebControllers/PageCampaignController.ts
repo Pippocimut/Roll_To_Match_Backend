@@ -54,15 +54,12 @@ export class PageCampaignController {
 
             const searchParams = {
                 ...searchParamsDTO,
-                filter: {
-                    location: searchParamsDTO.location || { lat: 0, lng: 0, radius: 10000 },
-                    owner: userId
-                }
+                owner: userId
             }
 
-            const campaigns = await this.campaignService.getCampaigns(searchParams)//, userCheckDTO.id)
+            const campaigns = await this.campaignService.getCampaigns(searchParams)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).render('pages/campaigns', { campaigns: adaptedCampaigns, userId: userId });
+            res.status(200).render('pages/campaigns', { campaigns: adaptedCampaigns, userId: userId, searchParams: JSON.stringify(searchParamsDTO) });
         } catch (err) {
             next(err)
         }
@@ -70,10 +67,7 @@ export class PageCampaignController {
 
     public getCampaigns = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            if (req.user === undefined) {
-                throw new Error('Unauthorized')
-            }
-            const userId = req.user._id.toString()
+            const userId = req.user?._id.toString() || ''
             const queryParam = JSON.parse(JSON.stringify(req.query)) || '{}'
             for (const key in queryParam) {
                 if (queryParam[key] === '') {
@@ -83,13 +77,11 @@ export class PageCampaignController {
                 }
             }
 
-            console.log(queryParam)
 
             const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(queryParam)
-            console.log(searchParamsDTO)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).render('pages/campaigns', { campaigns: adaptedCampaigns, userId: userId });
+            res.status(200).render('pages/campaigns', { campaigns: adaptedCampaigns, userId: userId, searchParams: JSON.stringify(searchParamsDTO) });
         } catch (err) {
             next(err)
         }
@@ -97,10 +89,7 @@ export class PageCampaignController {
 
     public getCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            if (req.user === undefined) {
-                throw new Error('Unauthorized')
-            }
-            const userId = req.user._id.toString()
+            const userId = req.user?._id.toString() || ''
             const campaign = await this.campaignService.getCampaign(req.params.id)
             console.log(JSON.stringify(campaign))
             res.status(200).render('pages/campaign', { campaign: CampaignAdapter.fromPersistedToReturnedCampaign(campaign), userId: userId });

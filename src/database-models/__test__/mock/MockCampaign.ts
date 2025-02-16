@@ -18,6 +18,7 @@ export function getMockCampaign(campaign?: Partial<PersistedCampaign>): Persiste
         reviews: new DocumentArray([]),
         owner: new ObjectId(),
         room: new ObjectId(),
+        game: "D&D",
         ...campaign
     }
 }

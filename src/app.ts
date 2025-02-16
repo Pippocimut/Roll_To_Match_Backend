@@ -5,6 +5,7 @@ import path from 'path';
 import "dotenv/config";
 import { auth as onlyAuthorizedUsers } from './middlewares/authMiddleware';
 import indexRoutes from './routes/index';
+import nonAuthorizedRoutes from './routes/public';
 import { errorHandler } from './routes/error';
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
@@ -13,6 +14,7 @@ const authRouter = require('./routes/auth');
 import apiRouter from './routes/api';
 import { assertEnvVariables } from 'util/assertEnvVariables';
 import { env } from 'process';
+import { loadUser } from 'middlewares/loadUser';
 const app = express();
 
 const PORT = process.env.PORT;
@@ -57,7 +59,10 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     }));
 
     console.log('Connected to MongoDB');
+    app.use(loadUser)
     app.use('/auth', authRouter);
+    app.use('/', nonAuthorizedRoutes);
+
     app.use(onlyAuthorizedUsers);
     app.use('/', indexRoutes);
     app.use('/api/v1', apiRouter)

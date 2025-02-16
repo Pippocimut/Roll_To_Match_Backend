@@ -26,11 +26,11 @@ async function createCampaign(req: Request, res: Response): Promise<void> {
 
         const coordinates = campaignDTO.location ? [campaignDTO.location.lng || 0, campaignDTO.location.lat || 0] : [0, 0]
 
-        const location =  {
+        const location = {
             type: "Point",
             coordinates: coordinates
         }
-        
+
         const tags = campaignDTO.tags || []
         if (tags.length > 0) {
             const invalidTags = tags.filter(tag => !Object.values(CampaignTags).includes(tag))
@@ -55,6 +55,7 @@ async function createCampaign(req: Request, res: Response): Promise<void> {
             registeredAt: new Date(),
             reviews: new DocumentArray([]),
             playerQueue: [],
+            game: campaignDTO.game,
             activePlayers: [],
         }
 

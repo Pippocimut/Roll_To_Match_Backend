@@ -6,6 +6,7 @@ import { Populator } from '../data-types/populator';
 import { CampaignTags } from '../../data-types/temp'
 import RoomPopulator from './Rooms';
 import UserPopulator from './Users';
+import { Games } from '../../data-types/games'
 
 const { DocumentArray } = mongoose.Types;
 
@@ -23,7 +24,7 @@ export class CampaignPopulator extends Populator {
                 campaignCreated += await this.populate(recordsN - campaignCreated);
             }
 
-            
+
             console.log("Database seeded with Campaigns! :)");
         } catch (err) {
             if (err instanceof Error) {
@@ -111,7 +112,7 @@ export class CampaignPopulator extends Populator {
             description: faker.lorem.paragraph(),
             location: {
                 type: "Point",
-                coordinates: [faker.location.longitude(), faker.location.latitude()]
+                coordinates: [faker.location.longitude({ max: 0.5, min: -0.5 }), faker.location.latitude({ max: 51.5, min: 51 })]
             },
             tags: tags,
             playerQueue: [],
@@ -119,6 +120,7 @@ export class CampaignPopulator extends Populator {
             reviews: new DocumentArray([]),
             registeredAt: new Date(),
             owner: owner._id,
+            game: faker.helpers.enumValue(Games),
             room: room._id,
         }
     }

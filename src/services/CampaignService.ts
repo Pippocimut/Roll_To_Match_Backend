@@ -11,6 +11,8 @@ export type CampaignSearchParams = {
     lat?: number;
     lng?: number;
     radius: number;
+    searchString?: string;
+    owner?: string;
     /* filter?: {
         room?: string;
         owner?: string;
@@ -53,6 +55,7 @@ export class CampaignService implements ICampaignService {
             registeredAt: new Date(),
             reviews: new DocumentArray([]),
             playerQueue: new DocumentArray([]),
+            game: campaignDTO.game,
             activePlayers: new DocumentArray([]),
         }
 
@@ -93,12 +96,30 @@ export class CampaignService implements ICampaignService {
                 filter["room"] = new ObjectId(searchParamsDTO.filter.room)
             }
         } */
+
+        const EARTH_RADIUS_KM = 6371;
+
+        if (searchParamsDTO.owner) {
+            filter["owner"] = new ObjectId(searchParamsDTO.owner)
+        }
+
+        if (searchParamsDTO.searchString) {
+            pipeline.push({
+                $match: {
+                    $or: [
+                        { title: { $regex: searchParamsDTO.searchString, $options: 'i' } },
+                        { description: { $regex: searchParamsDTO.searchString, $options: 'i' } }
+                    ]
+                }
+            })
+        }
+
         if (searchParamsDTO.lat && searchParamsDTO.lng && searchParamsDTO.radius) {
             pipeline.push({
                 $match: {
                     location: {
                         $geoWithin: {
-                            $centerSphere: [[searchParamsDTO.lng, searchParamsDTO.lat], searchParamsDTO.radius / 3963.2]
+                            $centerSphere: [[searchParamsDTO.lng, searchParamsDTO.lat], searchParamsDTO.radius / EARTH_RADIUS_KM]
                         }
                     }
                 }
@@ -110,17 +131,17 @@ export class CampaignService implements ICampaignService {
         }
 
         const sort: any = {};
-       /*  if (searchParamsDTO.sortBy) {
-            if (searchParamsDTO.sortBy.includes('location')) {
-                sort["distance"] = 1;
-            }
-            if (searchParamsDTO.sortBy.includes('title')) {
-                sort["title"] = 1;
-            }
-            if (searchParamsDTO.sortBy.includes('registeredAt')) {
-                sort["registeredAt"] = 1;
-            }
-        } */
+        /*  if (searchParamsDTO.sortBy) {
+             if (searchParamsDTO.sortBy.includes('location')) {
+                 sort["distance"] = 1;
+             }
+             if (searchParamsDTO.sortBy.includes('title')) {
+                 sort["title"] = 1;
+             }
+             if (searchParamsDTO.sortBy.includes('registeredAt')) {
+                 sort["registeredAt"] = 1;
+             }
+         } */
         sort["_id"] = 1; // Always include _id to ensure a consistent sort order
 
         if (Object.keys(sort).length > 0) {
