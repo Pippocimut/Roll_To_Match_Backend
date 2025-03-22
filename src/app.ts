@@ -54,7 +54,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
         }),
         cookie: {
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 1000 * 60 * 60 * 24 * 7 // 1 settimana
+            maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
         }
     }));
 
