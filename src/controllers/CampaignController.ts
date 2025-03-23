@@ -51,18 +51,17 @@ export class CampaignController {
 
     public getCampaigns = async (req: Request, res: Response): Promise<void> => {
         try {
-            if (!req.user) {
-                res.status(401).send('Unauthorized');
+            let userId = '';
+            if (req.user) {
+                userId = req.user._id.toString()
                 return;
             }
-            const userId = req.user._id.toString()
 
             const query = req.query
-            console.log(query)
             const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(query)
             const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
             const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).send(adaptedCampaigns) 
+            res.status(200).send(adaptedCampaigns)
 
         } catch (err) {
             if (err instanceof Error) {
@@ -74,11 +73,11 @@ export class CampaignController {
 
     public getCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
-            if (!req.user) {
-                res.status(401).send('Unauthorized');
+            let userId = '';
+            if (req.user) {
+                userId = req.user._id.toString()
                 return;
             }
-            const userId = req.user._id.toString()
             const campaign = await this.campaignService.getCampaign(req.params.id)
             console.log(JSON.stringify(campaign))
             res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign))

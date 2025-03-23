@@ -5,7 +5,14 @@ import { sign } from 'jsonwebtoken';
 
 const router = Router();
 
-router.get("/", (req, res) => { res.render("pages/auth") });
+router.get("/me", (req, res) => {
+    console.log(req.user)
+    if (req.user) {
+        res.send(req.user);
+    } else {
+        res.status(401).send({ message: 'Unauthorized' });
+    }
+});
 
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email", "openid"] }));
 router.get("/google/callback", passport.authenticate('google', { failureRedirect: "/login" }), async (req: Request, res: Response) => {
@@ -26,8 +33,8 @@ router.get("/google/callback", passport.authenticate('google', { failureRedirect
     }
 
     req.session.accessToken = sign({ id: req.user._id }, secretToken, { expiresIn: '1d' })
-    await req.session.save()
-    res.redirect("/");
+    req.session.save()
+    res.redirect("http://localhost:3001/auth/acceptToken?token=" + req.session.accessToken);
 });
 
 /* router.get("/facebook", passport.authenticate("facebook", { scope: ["email"] }));

@@ -9,6 +9,7 @@ import nonAuthorizedRoutes from './routes/public';
 import { errorHandler } from './routes/error';
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
+import cors from 'cors';
 
 const authRouter = require('./routes/auth');
 import apiRouter from './routes/api';
@@ -58,14 +59,16 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
         }
     }));
 
+
+    app.use(cors());
     console.log('Connected to MongoDB');
     app.use(loadUser)
     app.use('/auth', authRouter);
     app.use('/', nonAuthorizedRoutes);
 
-    app.use(onlyAuthorizedUsers);
+    //app.use(onlyAuthorizedUsers);
     app.use('/', indexRoutes);
-    app.use('/api/v1', apiRouter)
+    app.use('/api', apiRouter)
     app.use(errorHandler);
 
     app.listen(PORT, () => {
