@@ -11,6 +11,7 @@ export type PopulatedPersistedRoom = Omit<PersistedRoom, "campaigns"> & {
 export type AdaptedRoom = {
     id: string,
     owner: string,
+    title: string,
     campaigns: AdaptedCampaign[],
 }
 
@@ -25,6 +26,7 @@ export async function fromPersistedToReturnedRoom(persistedRoom: MongoDocument<P
     return {
         id: persistedRoom._id.toString(),
         owner: owner,
+        title: persistedRoom.title,
         campaigns: persistedRoom.campaigns.map((campaign) => CampaignAdapter.fromPersistedToReturnedCampaign(campaign)),
     }
 }

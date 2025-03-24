@@ -89,6 +89,33 @@ export class CampaignController {
         }
     }
 
+    public getMyCampaigns = async (req: Request, res: Response): Promise<void> => {
+        try {
+            if (!req.user) {
+                res.status(401).send('Unauthorized');
+                return;
+            }
+            const userId = req.user._id.toString()
+            const query = req.query
+            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(query)
+
+            const searchParams = {
+                ...searchParamsDTO,
+                owner: userId
+            }
+
+            const campaigns = await this.campaignService.getCampaigns(searchParams)
+            const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
+            res.status(200).send(adaptedCampaigns)
+        }
+        catch (err) {
+            if (err instanceof Error) {
+                res.status(500).json({ error: err.message })
+                this.CampaignControllerHandleError(err, res)
+            }
+        }
+    }
+
     public async updateCampaign(req: Request, res: Response): Promise<void> {
         try {
             const updateCampaignDTO: UpdateCampaignDTO = UpdateCampaignZodSchema.parse(req.body)

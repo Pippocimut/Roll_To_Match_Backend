@@ -11,7 +11,6 @@ export class RoomController {
     public static createRoom = async (req: Request, res: Response) => {
         try {
             const createRoomDTO = CreateRoomZodSchema.parse(req.body);
-
             if (!req.user) {
                 res.status(401).send('Unauthorized');
                 return;

@@ -18,6 +18,8 @@ router.get('/room/:id', RoomController.getRoom);
 router.put('/room/:id', RoomController.updateRoom);
 router.delete('/room/:id', RoomController.deleteRoom);
 
+router.get('/me/campaigns', CampaignController.getInstance().getMyCampaigns);
+
 router.post('/room/:id/campaign', RoomCampaignController.createCampaign);
 router.get('/room/:id/campaigns', RoomCampaignController.getCampaigns);
 

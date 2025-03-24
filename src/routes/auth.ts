@@ -6,7 +6,6 @@ import { sign } from 'jsonwebtoken';
 const router = Router();
 
 router.get("/me", (req, res) => {
-    console.log(req.user)
     if (req.user) {
         res.send(req.user);
     } else {
