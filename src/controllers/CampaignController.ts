@@ -1,41 +1,61 @@
-import { CreateCampaignDTO, CreateCampaignZodSchema } from "../dto/CreateCampaignDTO";
-import { UpdateCampaignDTO, UpdateCampaignZodSchema } from "../dto/UpdateCampaignDTO";
-import { SearchCampaignDTO, SearchCampaignZodSchema } from "../dto/SearchCampaignDTO";
-import { Client } from "@googlemaps/google-maps-services-js"
-import { CampaignService } from "../services/CampaignService";
+import {CreateCampaignDTO, CreateCampaignZodSchema} from "../dto/CreateCampaignDTO";
+import {UpdateCampaignDTO, UpdateCampaignZodSchema} from "../dto/UpdateCampaignDTO";
+import {SearchCampaignDTO, SearchCampaignZodSchema} from "../dto/SearchCampaignDTO";
+import {Client} from "@googlemaps/google-maps-services-js"
+import {CampaignService} from "../services/CampaignService";
 import CampaignAdapter from "../adapters/Campaign";
-import { Request, Response } from "express";
-import { CampaignModel } from "@roll-to-match/models";
+import {Request, Response} from "express";
+import {CampaignModel, RoomModel} from "@roll-to-match/models";
+import {RoomService} from "../services/RoomService";
+import {Client as MinioClient} from "minio";
 
 export class CampaignController {
 
     private static instance: CampaignController;
     private campaignService: CampaignService;
+    private roomService: RoomService;
+    private client : MinioClient;
 
     public static getInstance(): CampaignController {
         if (!CampaignController.instance) {
-            CampaignController.instance = new CampaignController(new CampaignService(CampaignModel));
+            CampaignController.instance = new CampaignController(new CampaignService(CampaignModel), new RoomService(RoomModel));
         }
         return CampaignController.instance;
     }
 
-    public constructor(campaignService: CampaignService) {
+    public constructor(campaignService: CampaignService, roomService: RoomService) {
         this.campaignService = campaignService;
+        this.roomService = roomService;
+        this.client = new MinioClient({
+            endPoint: '10.62.1.235',
+            port: 9000,
+            useSSL: true,
+            accessKey: 'minioadmin',
+            secretKey: 'minioadmin',
+        })
     }
 
-    public async createCampaign(req: Request, res: Response): Promise<void> {
+    public createCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
-            const campaignDTO: CreateCampaignDTO = CreateCampaignZodSchema.parse(req.body)
+            const campaignData = req.body;
+
+            const parseCampaignDTO = CreateCampaignZodSchema.safeParse(campaignData)
+
+            if (!parseCampaignDTO.success) {
+                res.status(400).send(parseCampaignDTO.error.message);
+                return
+            }
+
+            const campaignDTO: CreateCampaignDTO = parseCampaignDTO.data
+
             if (!req.user) {
                 res.status(401).send('Unauthorized');
                 return;
             }
-            if (!req.params.id) {
-                res.status(400).send('Room ID not provided');
-                return;
-            }
+
             const userId = req.user._id.toString()
-            const roomId = req.params.id
+            const room = await this.roomService.createRandomRoom(userId);
+            const roomId = room._id.toString()
 
             const campaign = await this.campaignService.createCampaign(campaignDTO, roomId, userId)
             const adaptedCampaign = CampaignAdapter.fromPersistedToReturnedCampaign(campaign)
@@ -43,7 +63,6 @@ export class CampaignController {
             res.status(200).send(adaptedCampaign)
         } catch (err) {
             if (err instanceof Error) {
-                res.status(500).json({ error: err.message })
                 this.CampaignControllerHandleError(err, res)
             }
         }
@@ -58,14 +77,24 @@ export class CampaignController {
             }
 
             const query = req.query
-            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(query)
-            const campaigns = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
-            const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).send(adaptedCampaigns)
+            const searchParamsDTOResult = SearchCampaignZodSchema.safeParse(query)
+            if (!searchParamsDTOResult.success) {
+                res.status(400).send(searchParamsDTOResult.error.message);
+                return
+            }
+
+            const searchParamsDTO = searchParamsDTOResult.data
+            const result = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
+            const adaptedCampaigns = result.campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
+            const sendBack = {
+                pagination: result.pagination,
+                campaigns: adaptedCampaigns,
+            }
+            res.status(200).send(sendBack)
 
         } catch (err) {
             if (err instanceof Error) {
-                res.status(500).json({ error: err.message })
+                res.status(500).json({error: err.message})
                 this.CampaignControllerHandleError(err, res)
             }
         }
@@ -78,45 +107,22 @@ export class CampaignController {
                 userId = req.user._id.toString()
                 return;
             }
+
             const campaign = await this.campaignService.getCampaign(req.params.id)
-            console.log(JSON.stringify(campaign))
+            if (!campaign) {
+                res.status(404).send('Campaign not found')
+                return
+            }
             res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign))
         } catch (err) {
             if (err instanceof Error) {
-                res.status(500).json({ error: err.message })
+                res.status(500).json({error: err.message})
                 this.CampaignControllerHandleError(err, res)
             }
         }
     }
 
-    public getMyCampaigns = async (req: Request, res: Response): Promise<void> => {
-        try {
-            if (!req.user) {
-                res.status(401).send('Unauthorized');
-                return;
-            }
-            const userId = req.user._id.toString()
-            const query = req.query
-            const searchParamsDTO: SearchCampaignDTO = SearchCampaignZodSchema.parse(query)
-
-            const searchParams = {
-                ...searchParamsDTO,
-                owner: userId
-            }
-
-            const campaigns = await this.campaignService.getCampaigns(searchParams)
-            const adaptedCampaigns = campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
-            res.status(200).send(adaptedCampaigns)
-        }
-        catch (err) {
-            if (err instanceof Error) {
-                res.status(500).json({ error: err.message })
-                this.CampaignControllerHandleError(err, res)
-            }
-        }
-    }
-
-    public async updateCampaign(req: Request, res: Response): Promise<void> {
+    public updateCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
             const updateCampaignDTO: UpdateCampaignDTO = UpdateCampaignZodSchema.parse(req.body)
 
@@ -124,48 +130,55 @@ export class CampaignController {
             const user = req.user
 
             if (!user) {
-                res.status(401).send({ message: 'Unauthorized' })
+                res.status(401).send({message: 'Unauthorized'})
+                return
+            }
+
+            if (!campaign){
+                res.status(404).send({message: 'Campaign not found'})
                 return
             }
 
             if (campaign.owner && campaign.owner.toString() !== user._id.toString()) {
-                res.status(401).send({ message: 'Unauthorized' })
+                res.status(401).send({message: 'Unauthorized'})
                 return
             }
 
             const campaignUpdateResult = await this.campaignService.updateCampaign(req.params.id, updateCampaignDTO)
             res.status(200).send(campaignUpdateResult);
-        }
-        catch (err) {
+        } catch (err) {
             if (err instanceof Error) {
-                res.status(500).json({ error: err.message })
+                res.status(500).json({error: err.message})
                 this.CampaignControllerHandleError(err, res)
             }
         }
     }
 
-
-    public async deleteCampaign(req: Request, res: Response): Promise<void> {
+    public deleteCampaign = async(req: Request, res: Response): Promise<void> => {
         try {
             const campaign = await this.campaignService.getCampaign(req.params.id)
             const user = req.user
 
             if (!user) {
-                res.status(401).send({ message: 'Unauthorized' })
+                res.status(401).send({message: 'Unauthorized'})
+                return
+            }
+
+            if (!campaign){
+                res.status(404).send({message: 'Campaign not found'})
                 return
             }
 
             if (campaign.owner && campaign.owner.toString() !== user.id) {
-                res.status(401).send({ message: 'Unauthorized' })
+                res.status(401).send({message: 'Unauthorized'})
                 return
             }
 
             const campaignUpdateResult = await this.campaignService.deleteCampaign(req.params.id)
             res.status(200).send(campaignUpdateResult);
-        }
-        catch (err) {
+        } catch (err) {
             if (err instanceof Error) {
-                res.status(500).json({ error: err.message })
+                res.status(500).json({error: err.message})
                 this.CampaignControllerHandleError(err, res)
             }
         }
@@ -175,13 +188,13 @@ export class CampaignController {
         console.error(err)
         switch (err.name) {
             case 'ValidationError':
-                res.status(400).send({ message: err.message })
+                res.status(400).send({message: err.message})
                 break;
             case 'UnauthorizedError':
-                res.status(401).send({ message: err.message })
+                res.status(401).send({message: err.message})
                 break;
             default:
-                res.status(500).send({ message: 'Internal server error' })
+                res.status(500).send({message: 'Internal server error'})
                 break;
         }
     }

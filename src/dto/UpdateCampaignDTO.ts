@@ -1,20 +1,23 @@
 import { z } from 'zod'
 import { RoomModel } from '../database-models/Room'
+import {CampaignTags} from "@roll-to-match/types";
 
 export const UpdateCampaignZodSchema = z.object({
     title: z.string().optional(),
     description: z.string().optional(),
-    owner: z.string().optional(),
-    room: z.string().optional(),
-    location: z.string().optional(),
-    tags: z.array(z.string()).min(1).optional(),
-}).refine(data => {
-    const getRoom = RoomModel.findById(data.room)
-    if (!getRoom) {
-        throw new Error('Room does not exist')
-    }
-    return true
+    tags: z.array(z.nativeEnum(CampaignTags)).optional(),
+    latitude: z.number({message:"Not provided"}).optional(),
+    longitude: z.number({message:"Not provided"}).optional(),
+    price : z.number().optional(),
+    schedule: z.object({
+        time: z.string().optional(),
+        frequency: z.string().optional(),
+        days: z.array(z.string()).optional()
+    }).optional(),
+    game: z.enum(['D&D', 'Pathfinder', 'Boardgames', 'Other']).optional(),
+    languages: z.array(z.string()).optional(),
+    requirements: z.string().optional(),
+    maxSeats: z.number().optional(),
 })
-
 
 export type UpdateCampaignDTO = z.infer<typeof UpdateCampaignZodSchema>

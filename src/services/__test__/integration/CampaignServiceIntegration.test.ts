@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
-import { SearchCampaignDTO, SearchCampaignZodSchema, UpdateCampaignDTO } from "@roll-to-match/dto";
-import { RoomModel, UserModel, CampaignModel } from "@roll-to-match/models";
-import { CampaignService } from "@roll-to-match/services";
-import { CampaignTags } from "@roll-to-match/types";
-import { describe, it } from "@jest/globals";
-import { getCreateCampaignDTO } from "@roll-to-match/dto-test/mock/MockCreateCampaignDTO"
-import { getMockCampaign } from "@roll-to-match/models-test/mock/MockCampaign";
+import {SearchCampaignDTO, SearchCampaignZodSchema, UpdateCampaignDTO} from "@roll-to-match/dto";
+import {RoomModel, UserModel, CampaignModel} from "@roll-to-match/models";
+import {CampaignService} from "@roll-to-match/services";
+import {CampaignTags} from "@roll-to-match/types";
+import {describe, it} from "@jest/globals";
+import {getCreateCampaignDTO} from "@roll-to-match/dto-test/mock/MockCreateCampaignDTO"
+import {getMockCampaign} from "@roll-to-match/models-test/mock/MockCampaign";
 import 'dotenv/config';
-import { assertEnvVariables } from "util/assertEnvVariables";
+import {assertEnvVariables} from "util/assertEnvVariables";
 
-const { ObjectId } = require('mongoose').Types;
+const {ObjectId} = require('mongoose').Types;
 
 const databaseName = "roll-to-match-test";
 
@@ -51,14 +51,14 @@ describe('CampaignService', () => {
 
                     const dto = getCreateCampaignDTO()
 
-                    const campaignsInRoom = await RoomModel.deleteMany({ room: room[0]._id })
+                    const campaignsInRoom = await RoomModel.deleteMany({room: room[0]._id})
 
                     const campaign = await service.createCampaign(dto, room[0]._id.toString(), user._id.toString());
                 })
             })
             describe('and the data is invalid', () => {
                 it('should throw an error database validation fails', async () => {
-                    const dto = getCreateCampaignDTO({ tags: ["invalid invalid" as CampaignTags] })
+                    const dto = getCreateCampaignDTO({tags: ["invalid invalid" as CampaignTags]})
 
                     try {
                         const campaign = await service.createCampaign(dto, new ObjectId().toString(), new ObjectId().toString());
@@ -82,7 +82,8 @@ describe('CampaignService', () => {
                     lng: 0,
                     radius: 1000,
                     sortBy: ["location"],
-                    limit: 10
+                    limit: 10,
+                    page:1,
                 }
 
 
@@ -95,23 +96,23 @@ describe('CampaignService', () => {
                     location: location
                 }))
 
-                const campaigns = await service.getCampaigns(searchParamsDTO);
+                const result = await service.getCampaigns(searchParamsDTO);
 
-                expect(campaigns).toBeDefined();
-                expect(campaigns.length).toBeGreaterThanOrEqual(0);
-                expect(campaigns.length).toBeLessThanOrEqual(10);
+                expect(result).toBeDefined();
+                expect(result.campaigns.length).toBeGreaterThanOrEqual(0);
+                expect(result.campaigns.length).toBeLessThanOrEqual(10);
 
-                await CampaignModel.deleteOne({ _id: createCampaign._id.toString() })
+                await CampaignModel.deleteOne({_id: createCampaign._id.toString()})
             })
             it('should return a list of campaigns without a DTO', async () => {
                 const createCampaign = await CampaignModel.create(getMockCampaign({}))
                 const searchParams = SearchCampaignZodSchema.parse({})
-                const campaigns = await service.getCampaigns(searchParams);
+                const result = await service.getCampaigns(searchParams);
 
-                expect(campaigns).toBeDefined();
-                expect(campaigns.length).toBeGreaterThanOrEqual(1);
+                expect(result).toBeDefined();
+                expect(result.campaigns.length).toBeGreaterThanOrEqual(1);
 
-                await CampaignModel.deleteOne({ _id: createCampaign._id.toString() })
+                await CampaignModel.deleteOne({_id: createCampaign._id.toString()})
             });
         })
 
@@ -124,7 +125,7 @@ describe('CampaignService', () => {
             })
             it('should return an error if the campaign is not found', async () => {
                 const campaigns = await CampaignModel.find({}).limit(1);
-                await CampaignModel.deleteOne({ _id: campaigns[0]._id.toString() })
+                await CampaignModel.deleteOne({_id: campaigns[0]._id.toString()})
 
                 const campaign = await service.getCampaign(campaigns[0]._id.toString());
 
@@ -136,7 +137,7 @@ describe('CampaignService', () => {
 
         describe('when updating a campaign', () => {
             it('should update a campaign', async () => {
-                const campaign = getMockCampaign({ title: "scooby doo" })
+                const campaign = getMockCampaign({title: "scooby doo"})
                 const createdCampaign = await CampaignModel.create(campaign)
 
                 const updateDTO: UpdateCampaignDTO = {
@@ -148,7 +149,7 @@ describe('CampaignService', () => {
                 expect(updatedCampaign).toBeDefined();
                 expect(updatedCampaign.title).toBe("new title");
 
-                await CampaignModel.deleteOne({ _id: createdCampaign._id.toString() })
+                await CampaignModel.deleteOne({_id: createdCampaign._id.toString()})
             })
         })
 

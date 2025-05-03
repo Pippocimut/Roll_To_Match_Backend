@@ -3,29 +3,29 @@ import mongoose from 'mongoose';
 import express from 'express';
 import path from 'path';
 import "dotenv/config";
-import { auth as onlyAuthorizedUsers } from './middlewares/authMiddleware';
-import indexRoutes from './routes/index';
-import nonAuthorizedRoutes from './routes/public';
-import { errorHandler } from './routes/error';
+import {errorHandler} from './routes/error';
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import cors from 'cors';
 
 const authRouter = require('./routes/auth');
 import apiRouter from './routes/api';
-import { assertEnvVariables } from 'util/assertEnvVariables';
-import { env } from 'process';
-import { loadUser } from 'middlewares/loadUser';
+import {assertEnvVariables} from 'util/assertEnvVariables';
+import {env} from 'process';
+import {loadUser} from 'middlewares/loadUser';
+import multer from 'multer';
+import {Client as MinioClient} from "minio";
+
 const app = express();
 
 const PORT = process.env.PORT;
-
-app.use(express.json());
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../views'));
-app.use(express.static(path.join(__dirname, '../public')));
-
-app.use(express.urlencoded({ extended: false }));
+const minioClient = new MinioClient({
+    endPoint: '127.0.0.1',
+    port: 9000,
+    useSSL: false,
+    accessKey: 'minioadmin',
+    secretKey: 'minioadmin',
+})
 
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
@@ -45,7 +45,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     user: envVariable["MONGO_USER"],
     pass: envVariable["MONGO_PASS"],
     dbName: envVariable["DATABASE_NAME"],
-}).then(() => {
+}).then(async () => {
     app.use(session({
         secret: process.env.SESSION_SECRET || 'your-secret-key',
         resave: false,
@@ -59,16 +59,61 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
         }
     }));
 
+    console.log('Connected to MongoDB');
 
     app.use(cors());
-    console.log('Connected to MongoDB');
     app.use(loadUser)
-    app.use('/auth', authRouter);
-    app.use('/', nonAuthorizedRoutes);
+
+    const upload = multer({
+        dest: '/tmp/', // Temporary storage location
+        limits: {
+            fileSize: 10 * 1024 * 1024, // Set limit to 10MB (10 * 1024 * 1024 bytes)
+        },
+    });
+
+    app.use("/upload-image", upload.single("file"), async (req, res, next) => {
+        const image = req.file;
+        if (!image) {
+            res.status(400).send('No image provided');
+            return
+        }
+
+        const bucketExists = await minioClient.bucketExists('image-bucket-bbk-project');
+
+        if (!bucketExists){
+            await minioClient.makeBucket('image-bucket-bbk-project', 'eu-north-1')
+            const policy = {
+                Version: "2012-10-17",
+                Statement: [
+                    {
+                        Effect: "Allow",
+                        Principal: "*",
+                        Action: ["s3:GetObject"],
+                        Resource: ["arn:aws:s3:::image-bucket-bbk-project/*"]
+                    }
+                ]
+            };
+
+            await minioClient.setBucketPolicy('image-bucket-bbk-project', JSON.stringify(policy));
+        }
+
+        const randomName = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+        const fileExtension = image.originalname.split('.').pop();
+
+        const newFileName = `${randomName}.${fileExtension}`;
+
+        await minioClient.fPutObject('image-bucket-bbk-project', newFileName, image.path);
+        const imageUrl = `http://127.0.0.1:9000/image-bucket-bbk-project/${newFileName}`
+        console.log(imageUrl)
+        res.status(200).json(imageUrl)
+    });
+
+    //app.use(express.urlencoded({extended: false}));
+    app.use('/auth', express.json(), authRouter);
 
     //app.use(onlyAuthorizedUsers);
-    app.use('/', indexRoutes);
-    app.use('/api', apiRouter)
+    app.use('/api', express.json(), apiRouter)
     app.use(errorHandler);
 
     app.listen(PORT, () => {

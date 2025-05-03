@@ -1,10 +1,10 @@
-import { NextFunction, Request, Response } from 'express'
-import { UserModel } from '../database-models/User'
-import { CampaignModel } from '../database-models/Campaign'
-import { CampaignService } from 'services/CampaignService'
-import { CandidateService } from 'services/CandidateService'
-import { CreateCandidateDTO } from 'dto/CreateCandidateDTO'
-import { CreateCandidateZodSchema } from 'dto/CreateCandidateDTO'
+import {NextFunction, Request, Response} from 'express'
+import {UserModel} from '../database-models/User'
+import {CampaignModel} from '../database-models/Campaign'
+import {CampaignService} from 'services/CampaignService'
+import {CandidateService} from 'services/CandidateService'
+import {CreateCandidateDTO} from 'dto/CreateCandidateDTO'
+import {CreateCandidateZodSchema} from 'dto/CreateCandidateDTO'
 import PlayerAdapter from '../adapters/Player'
 
 export class CampaignCandidatePlayerController {
@@ -23,9 +23,11 @@ export class CampaignCandidatePlayerController {
         }
         return CampaignCandidatePlayerController.instance;
     }
+
     public createCandidatePlayer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const { campaignId } = req.params
+            const {campaignId} = req.params
+
             if (req.user === undefined) {
                 throw new Error('Unauthorized')
             }
@@ -38,6 +40,9 @@ export class CampaignCandidatePlayerController {
             }
 
             const campaign = await this.campaignService.getCampaign(campaignId)
+            if (!campaign) {
+                throw new Error('Campaign not found')
+            }
             const player = await this.candidateService.createCandidate(campaign._id.toString(), user)
 
             const adaptedPlayer = PlayerAdapter.fromPersistedToReturnedPlayer(player)
@@ -53,7 +58,7 @@ export class CampaignCandidatePlayerController {
     public static getCandidatePlayer = getCandidatePlayer
     public deleteCandidatePlayer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const { campaignId, playerId } = req.params
+            const {campaignId, playerId} = req.params
 
             if (req.user === undefined) {
                 throw new Error('Unauthorized')
@@ -62,7 +67,9 @@ export class CampaignCandidatePlayerController {
             const userId = req.user._id.toString()
 
             const campaign = await this.campaignService.getCampaign(campaignId)
-
+            if (!campaign) {
+                throw new Error('Campaign not found')
+            }
             const isPlayerOwner = campaign.owner.toString() === userId.toString()
             const isPlayerInQueue = campaign.playerQueue.find(player => player._id.toString() === playerId)
             const isPlayerActive = campaign.activePlayers.find(player => player._id.toString() === playerId)
@@ -73,10 +80,10 @@ export class CampaignCandidatePlayerController {
 
             const candidate = await this.candidateService.deleteCandidate(campaignId, playerId)
 
-            res.json({ message: 'Player removed' })
+            res.json({message: 'Player removed'})
         } catch (error) {
             if (error instanceof Error) {
-                res.status(500).json({ error: error.message })
+                res.status(500).json({error: error.message})
             }
         }
     }
@@ -84,7 +91,7 @@ export class CampaignCandidatePlayerController {
 
 async function getCandidatePlayers(req: Request, res: Response): Promise<void> {
     try {
-        const { campaignId } = req.params
+        const {campaignId} = req.params
         const campaign = await CampaignModel.findById(campaignId)
         if (!campaign) {
             throw new Error('Campaign not found')
@@ -92,14 +99,14 @@ async function getCandidatePlayers(req: Request, res: Response): Promise<void> {
         res.json(campaign.playerQueue)
     } catch (error) {
         if (error instanceof Error) {
-            res.status(500).json({ error: error.message })
+            res.status(500).json({error: error.message})
         }
     }
 }
 
 async function getCandidatePlayer(req: Request, res: Response): Promise<void> {
     try {
-        const { campaignId, playerId } = req.params
+        const {campaignId, playerId} = req.params
         const campaign = await CampaignModel.findById(campaignId)
         if (!campaign) {
             throw new Error('Campaign not found')
@@ -113,7 +120,7 @@ async function getCandidatePlayer(req: Request, res: Response): Promise<void> {
         res.json(player)
     } catch (error) {
         if (error instanceof Error) {
-            res.status(500).json({ error: error.message })
+            res.status(500).json({error: error.message})
         }
     }
 }

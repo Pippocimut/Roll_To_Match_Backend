@@ -1,14 +1,15 @@
 import mongoose from 'mongoose';
-import { faker } from "@faker-js/faker";
-import { PersistedCampaign } from "@roll-to-match/models";
+import {faker} from "@faker-js/faker";
+import {PersistedCampaign} from "@roll-to-match/models";
 import 'dotenv/config';
-import { Populator } from '../data-types/populator';
-import { CampaignTags } from '../../data-types/temp'
+import {Populator} from '../data-types/populator';
+import {CampaignTags} from '../../data-types/temp'
 import RoomPopulator from './Rooms';
 import UserPopulator from './Users';
-import { Games } from '../../data-types/games'
+import {Games} from '../../data-types/games'
+import {Days, Frequencies} from "../../data-types";
 
-const { DocumentArray } = mongoose.Types;
+const {DocumentArray} = mongoose.Types;
 
 export class CampaignPopulator extends Populator {
     public static populatorCollection = "campaign";
@@ -53,7 +54,7 @@ export class CampaignPopulator extends Populator {
             const users = await usersCollection.find().skip(i * pagesize).limit(pagesize).toArray();
 
             for (const owner of users) {
-                const rooms = await roomCollection.find({ owner: owner._id }).toArray();
+                const rooms = await roomCollection.find({owner: owner._id}).toArray();
                 if (!rooms) {
                     continue;
                 }
@@ -82,12 +83,12 @@ export class CampaignPopulator extends Populator {
                     campaignCreated += randomNumberForCampaigns;
                     await campaignCollection.insertMany(toCreateCampaigns);
 
-                    const campaignsInRoom = await campaignCollection.find({ room: room._id }).toArray();
+                    const campaignsInRoom = await campaignCollection.find({room: room._id}).toArray();
                     if (!campaignsInRoom) {
                         continue;
                     }
 
-                    await roomCollection.updateOne({ _id: room._id }, { $set: { campaigns: campaignsInRoom.map(campaign => campaign._id) } });
+                    await roomCollection.updateOne({_id: room._id}, {$set: {campaigns: campaignsInRoom.map(campaign => campaign._id)}});
 
                     if (campaignCreated >= toCreate) {
                         return campaignCreated;
@@ -110,9 +111,27 @@ export class CampaignPopulator extends Populator {
         return {
             title: faker.lorem.words(3),
             description: faker.lorem.paragraph(),
+            image: "",
+            schedule: {
+                days: faker.helpers.arrayElements(Object.values(Days), {min: 1, max: 2}),
+                time: faker.date.anytime().toLocaleTimeString(navigator.language, {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                frequency: faker.helpers.enumValue(Frequencies)
+            },
+            maxSeats: faker.number.int({min: 1, max: 6}),
+            price: faker.number.float({min: 1.00, max: 20.00, fractionDigits: 2}),
+            languages: [
+                faker.lorem.word()
+            ],
+            requirements: faker.lorem.paragraph(),
             location: {
                 type: "Point",
-                coordinates: [faker.location.longitude({ max: 0.5, min: -0.5 }), faker.location.latitude({ max: 51.5, min: 51 })]
+                coordinates: [faker.location.longitude({max: 0.5, min: -0.5}), faker.location.latitude({
+                    max: 51.5,
+                    min: 51
+                })]
             },
             tags: tags,
             playerQueue: [],
@@ -140,7 +159,7 @@ export class CampaignPopulator extends Populator {
             //recreate the collection
             await this.client.db(this.databaseName).createCollection("campaigns");
 
-            const result = await collection.createIndex({ location: "2dsphere" });
+            const result = await collection.createIndex({location: "2dsphere"});
 
             console.log(result);
             console.log("Collection campaigns reset");
@@ -154,4 +173,5 @@ export class CampaignPopulator extends Populator {
         }
     }
 }
+
 export default CampaignPopulator;

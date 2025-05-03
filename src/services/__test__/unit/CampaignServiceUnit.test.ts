@@ -1,11 +1,11 @@
-import { CampaignModel } from "@roll-to-match/models";
-import { describe, it } from "@jest/globals";
-import { CampaignService } from "@roll-to-match/services";
-import { getCreateCampaignDTO } from "@roll-to-match/dto-test/mock/MockCreateCampaignDTO"
-import { getMockCampaign } from "@roll-to-match/models-test/mock/MockCampaign"
+import {CampaignModel} from "@roll-to-match/models";
+import {describe, it} from "@jest/globals";
+import {CampaignService} from "@roll-to-match/services";
+import {getCreateCampaignDTO} from "@roll-to-match/dto-test/mock/MockCreateCampaignDTO"
+import {getMockCampaign} from "@roll-to-match/models-test/mock/MockCampaign"
 import 'dotenv/config';
 
-const { ObjectId, DocumentArray } = require('mongoose').Types;
+const {ObjectId, DocumentArray} = require('mongoose').Types;
 
 describe('CampaignService', () => {
     describe('integration tests', () => {
@@ -27,7 +27,9 @@ describe('CampaignService', () => {
                     const dto = getCreateCampaignDTO({})
                     const roomId = new ObjectId().toString()
                     const userId = new ObjectId().toString()
-                    jest.spyOn(CampaignModel, 'create').mockImplementationOnce(() => { throw new Error() });
+                    jest.spyOn(CampaignModel, 'create').mockImplementationOnce(() => {
+                        throw new Error()
+                    });
 
                     try {
                         const campaign = await service.createCampaign(dto, roomId, userId);

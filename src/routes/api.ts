@@ -2,44 +2,24 @@
 import { Router } from 'express';
 import { CampaignController } from '../controllers/CampaignController';
 import { CampaignPlayerController } from '../controllers/CampaignPlayerController';
-import { RoomCampaignController } from '../controllers/RoomCampaignController';
-import { RoomController } from '../controllers/RoomController';
-import { ReviewController } from '../controllers/ReviewController';
 import { CampaignCandidatePlayerController } from 'controllers/CampaignCandidatePlayerController';
+import multer from "multer";
 
 const router = Router();
 
+var upload = multer({ dest: './uploads'});
+
 router.get('/campaigns', CampaignController.getInstance().getCampaigns);
+router.post('/campaign', upload.single('file'), CampaignController.getInstance().createCampaign);
+
 router.get('/campaign/:id', CampaignController.getInstance().getCampaign);
-
-router.post('/room', RoomController.createRoom);
-router.get('/rooms', RoomController.getRooms);
-router.get('/room/:id', RoomController.getRoom);
-router.put('/room/:id', RoomController.updateRoom);
-router.delete('/room/:id', RoomController.deleteRoom);
-
-router.get('/me/campaigns', CampaignController.getInstance().getMyCampaigns);
-
-router.post('/room/:id/campaign', RoomCampaignController.createCampaign);
-router.get('/room/:id/campaigns', RoomCampaignController.getCampaigns);
-
-router.put('/campaign/:id', CampaignController.getInstance().updateCampaign);
+router.patch('/campaign/:id', CampaignController.getInstance().updateCampaign);
 router.delete('/campaign/:id', CampaignController.getInstance().deleteCampaign);
 
-router.post('/campaign/:id/review', ReviewController.createReview);
-router.get('/campaign/:id/reviews', ReviewController.getReviews);
-router.get('/campaign/:id/review/:id', ReviewController.getReview);
-router.put('/campaign/:id/review/:id', ReviewController.updateReview);
-router.delete('/campaign/:id/review/:id', ReviewController.deleteReview);
-
-router.post('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getInstance().createCandidatePlayer);
-router.get('/campaign/:campaignId/candidate', CampaignCandidatePlayerController.getCandidatePlayers);
-router.get('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getCandidatePlayer);
+router.post('/campaign/:campaignId/join', CampaignCandidatePlayerController.getInstance().createCandidatePlayer);
 router.delete('/campaign/:campaignId/player/:playerId', CampaignCandidatePlayerController.getInstance().deleteCandidatePlayer);
 
 router.post('/campaign/:campaignId/player/:playerId', CampaignPlayerController.createPlayer);
-// router.get('/campaign/:campaignId/players', CampaignPlayerController.getPlayers);
-// router.get('/campaign/:campaignId/player/:playerId', CampaignPlayerController.getPlayer);
-// router.delete('/campaign/:campaignId/player/:playerId', CampaignPlayerController.deletePlayer);
+router.delete('/campaign/:campaignId/active-player/:playerId', CampaignPlayerController.kickPlayer);
 
 export default router;
