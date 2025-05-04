@@ -10,7 +10,7 @@ const router = Router();
 var upload = multer({ dest: './uploads'});
 
 router.get('/campaigns', CampaignController.getInstance().getCampaigns);
-router.post('/campaign', upload.single('file'), CampaignController.getInstance().createCampaign);
+router.post('/campaign', CampaignController.getInstance().createCampaign);
 
 router.get('/campaign/:id', CampaignController.getInstance().getCampaign);
 router.patch('/campaign/:id', CampaignController.getInstance().updateCampaign);

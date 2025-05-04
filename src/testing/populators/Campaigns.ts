@@ -136,7 +136,6 @@ export class CampaignPopulator extends Populator {
             tags: tags,
             playerQueue: [],
             activePlayers: [],
-            reviews: new DocumentArray([]),
             registeredAt: new Date(),
             owner: owner._id,
             game: faker.helpers.enumValue(Games),

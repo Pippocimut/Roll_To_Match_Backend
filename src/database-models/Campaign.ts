@@ -1,7 +1,5 @@
-import mongoose, {InferSchemaType} from "mongoose";
-import {ReviewSchema} from "./Review";
-import {UserSchema} from "./User";
-import {CampaignTags, Days, Frequencies, MongoDocument} from "../data-types";
+import mongoose from "mongoose";
+import { Days, Frequencies, MongoDocument} from "../data-types";
 import {PersistedUser} from "./User";
 
 export interface PersistedCampaign {
@@ -10,6 +8,7 @@ export interface PersistedCampaign {
     owner: mongoose.Types.ObjectId;
     room: mongoose.Types.ObjectId;
     locationName? :string;
+    nextSession?: Date;
     location: {
         type: string;
         coordinates: number[];
@@ -28,7 +27,6 @@ export interface PersistedCampaign {
     contactInfo?: string;
     tags: string[];
     registeredAt: Date;
-    reviews: any[];
     playerQueue: MongoDocument<PersistedUser>[];
     activePlayers: MongoDocument<PersistedUser>[];
 }
@@ -57,6 +55,11 @@ export const CampaignSchema = new mongoose.Schema<PersistedCampaign>({
             enum: Frequencies,
             required: true,
         }
+    },
+    nextSession: {
+        type: Date,
+        required: false,
+        default: null,
     },
     contactInfo: {
         type: String,
@@ -95,11 +98,6 @@ export const CampaignSchema = new mongoose.Schema<PersistedCampaign>({
         default: 'D&D 5e',
         required: true
     },
-    reviews: [{
-        type: ReviewSchema,
-        required: false,
-        default: []
-    }],
     registeredAt: {
         type: Date,
         default: Date.now,

@@ -13,6 +13,10 @@ export const UserSchema = new Schema({
         type: String,
         required: true
     },
+    imageUrl:{
+        type: String,
+        required: false
+    },
     date: {
         type: Date,
         default: Date.now

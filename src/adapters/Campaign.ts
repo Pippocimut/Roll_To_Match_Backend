@@ -25,7 +25,6 @@ export type AdaptedCampaign = {
     game: string,
     tags: string[],
     registeredAt: Date,
-    reviews: any[],
     playerQueue: AdaptedPlayer[],
     activePlayers: AdaptedPlayer[],
 }
@@ -46,7 +45,6 @@ function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<Persis
         locationName: persistedCampaign.locationName,
         tags: persistedCampaign.tags,
         registeredAt: persistedCampaign.registeredAt,
-        reviews: persistedCampaign.reviews,
         game: persistedCampaign.game,
         price: persistedCampaign.price,
         languages: persistedCampaign.languages,

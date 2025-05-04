@@ -1,30 +1,28 @@
 import './register-paths';
 import mongoose from 'mongoose';
 import express from 'express';
-import path from 'path';
 import "dotenv/config";
 import {errorHandler} from './routes/error';
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import cors from 'cors';
-
-const authRouter = require('./routes/auth');
+import authRouter from "./routes/auth";
 import apiRouter from './routes/api';
 import {assertEnvVariables} from 'util/assertEnvVariables';
-import {env} from 'process';
 import {loadUser} from 'middlewares/loadUser';
 import multer from 'multer';
 import {Client as MinioClient} from "minio";
+import * as process from "node:process";
 
 const app = express();
 
 const PORT = process.env.PORT;
 const minioClient = new MinioClient({
-    endPoint: '127.0.0.1',
-    port: 9000,
-    useSSL: false,
-    accessKey: 'minioadmin',
-    secretKey: 'minioadmin',
+    endPoint: process.env.STORAGE_URL || 'storage.googleapis.com',
+    port: parseInt(process.env.STORAGE_PORT || "443"),
+    useSSL: process.env.STORAGE_SSL === 'true',
+    accessKey: process.env.STORAGE_ACCESS_KEY,
+    secretKey: process.env.STORAGE_SECRET_KEY,
 })
 
 app.use((req, res, next) => {
@@ -37,6 +35,11 @@ const envVariable = assertEnvVariables([
     'MONGO_USER',
     'MONGO_PASS',
     'DATABASE_NAME',
+    'STORAGE_URL',
+    'STORAGE_PORT',
+    'STORAGE_SSL',
+    'STORAGE_ACCESS_KEY',
+    'STORAGE_SECRET_KEY',
 ])
 
 console.log(JSON.stringify(envVariable))
@@ -104,10 +107,17 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
         const newFileName = `${randomName}.${fileExtension}`;
 
         await minioClient.fPutObject('image-bucket-bbk-project', newFileName, image.path);
-        const imageUrl = `http://127.0.0.1:9000/image-bucket-bbk-project/${newFileName}`
+        const hostURl = process.env.STORAGE_URL || 'storage.googleapis.com';
+        const port = process.env.STORAGE_PORT || '443';
+        const protocol = process.env.STORAGE_SSL === 'true' ? 'https' : 'http';
+        const imageUrl = `${protocol}://${hostURl}:${port}/image-bucket-bbk-project/${newFileName}`
         console.log(imageUrl)
         res.status(200).json(imageUrl)
     });
+
+    if (await minioClient.bucketExists('image-bucket-bbk-project')) {
+        console.log('Storage Bucket exists');
+    }
 
     //app.use(express.urlencoded({extended: false}));
     app.use('/auth', express.json(), authRouter);

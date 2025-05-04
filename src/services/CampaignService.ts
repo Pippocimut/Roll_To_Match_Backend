@@ -2,7 +2,6 @@ import {CampaignModel, PersistedCampaign} from "../database-models/Campaign";
 import {CreateCampaignDTO} from "../dto/CreateCampaignDTO";
 import {UpdateCampaignDTO} from "../dto/UpdateCampaignDTO";
 import {Days, DeepPartial, Frequencies, MongoDocument} from "@roll-to-match/types";
-import {z} from "zod";
 
 const {ObjectId, DocumentArray} = require('mongoose').Types;
 
@@ -76,6 +75,7 @@ export class CampaignService implements ICampaignService {
             room: new ObjectId(roomId),
             locationName: campaignDTO.locationName,
             location: location,
+            nextSession: campaignDTO.nextSession,
             tags: tags,
             schedule: {
                 days: campaignDTO.schedule.days as Days[],
@@ -89,7 +89,6 @@ export class CampaignService implements ICampaignService {
             languages: campaignDTO?.languages || [],
             maxSeats: campaignDTO?.maxSeats || 1,
             registeredAt: new Date(),
-            reviews: new DocumentArray([]),
             playerQueue: new DocumentArray([]),
             game: campaignDTO.game,
             activePlayers: new DocumentArray([]),
@@ -242,6 +241,7 @@ export class CampaignService implements ICampaignService {
                 time: campaignDTO?.schedule?.time,
                 frequency: campaignDTO?.schedule?.frequency as Frequencies,
             },
+            nextSession: campaignDTO?.nextSession,
             requirements: campaignDTO?.requirements,
             price: campaignDTO?.price,
             languages: campaignDTO?.languages,

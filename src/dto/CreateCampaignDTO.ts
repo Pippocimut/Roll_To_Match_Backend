@@ -11,6 +11,7 @@ export const CreateCampaignZodSchema = z.object({
     price : z.number().default(0),
     contactInfo: z.string().optional(),
     image: z.string().optional(),
+    nextSession: z.date().optional(),
     schedule: z.object({
         time: z.string(),
         frequency: z.string(z.nativeEnum(Frequencies)),

@@ -15,7 +15,6 @@ export function getMockCampaign(campaign?: Partial<PersistedCampaign>): Persiste
         registeredAt: new Date(),
         playerQueue: new DocumentArray([]),
         activePlayers: new DocumentArray([]),
-        reviews: new DocumentArray([]),
         owner: new ObjectId(),
         room: new ObjectId(),
         game: "D&D",

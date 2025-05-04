@@ -9,6 +9,7 @@ export const UpdateCampaignZodSchema = z.object({
     latitude: z.number({message:"Not provided"}).optional(),
     longitude: z.number({message:"Not provided"}).optional(),
     price : z.number().optional(),
+    nextSession: z.date().optional(),
     schedule: z.object({
         time: z.string().optional(),
         frequency: z.string().optional(),
