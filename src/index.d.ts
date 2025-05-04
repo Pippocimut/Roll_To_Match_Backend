@@ -9,7 +9,7 @@ declare global {
       accessToken: string;
     }
     interface Request {
-      user?: mongoose.Document<PersistedUser>
+      user?: mongoose.Document<any, any, PersistedUser>
     }
   }
 }
