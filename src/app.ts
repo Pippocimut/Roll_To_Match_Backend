@@ -63,7 +63,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     }));
 
     console.log('Connected to MongoDB');
-    
+
     app.use('/auth', express.json(), authRouter);
 
     app.use(cors({

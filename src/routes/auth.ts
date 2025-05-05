@@ -36,7 +36,7 @@ router.get("/google/callback", passport.authenticate('google', {failureRedirect:
 
     req.session.accessToken = sign({id: req.user._id}, secretToken, {expiresIn: '1d'})
     req.session.save()
-    res.redirect("http://localhost:3001/auth/acceptToken?token=" + req.session.accessToken);
+    res.status(200).send({token: req.session.accessToken})
 });
 
 /* router.get("/facebook", passport.authenticate("facebook", { scope: ["email"] }));
