@@ -4,7 +4,7 @@ import { UserModel } from 'database-models/User';
 
 export async function loadUser(req, res, next) {
     const authorization = req.cookies?.accessToken;
-    console.log("Cookies",req.cookies)
+    console.log("Cookies",JSON.stringify(req.cookies))
     if (!authorization) {
         return next()
     }
