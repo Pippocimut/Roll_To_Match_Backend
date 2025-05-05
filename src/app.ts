@@ -64,8 +64,6 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     console.log('Connected to MongoDB');
 
-    app.use('/auth', express.json(), authRouter);
-
     app.use(cors({
         origin: (origin, callback) => {
             const allowedOriginRegex = /\.vercel\.app$/; // Allow *.vercel.app
@@ -76,6 +74,9 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
             }
         }
     }))
+
+    app.use('/auth', express.json(), authRouter);
+
     app.use(loadUser)
 
     const upload = multer({
