@@ -25,6 +25,17 @@ const minioClient = new MinioClient({
     secretKey: process.env.STORAGE_SECRET_KEY,
 })
 
+app.use(cors({
+    origin: (origin, callback) => {
+        const allowedOriginRegex = /\.vercel\.app$/; // Allow *.vercel.app
+        if (origin && allowedOriginRegex.test(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    }
+}))
+
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();
