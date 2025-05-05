@@ -66,8 +66,11 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     app.use(cors({
         origin: (origin, callback) => {
+            const regex = /^roll-to-match-frontend.*\.pippocimuts-projects\.vercel\.app$/;
+
             const allowedOrigins = [
-                '*' // Add your frontend URL
+                regex,
+                "https://accounts.google.com"
             ];
             if (origin && allowedOrigins.includes(origin)) {
                 callback(null, true); // Allow the origin
