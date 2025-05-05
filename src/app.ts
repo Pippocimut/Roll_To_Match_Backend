@@ -82,11 +82,8 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     }));
 
 
-
-    app.use('/auth', express.json(), authRouter);
-
     app.use(loadUser)
-
+    app.use('/auth', express.json(), authRouter);
     const upload = multer({
         dest: '/tmp/', // Temporary storage location
         limits: {
