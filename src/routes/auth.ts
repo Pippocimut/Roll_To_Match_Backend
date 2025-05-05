@@ -80,7 +80,7 @@ router.get(
         });
 
         // ✅ Redirect to frontend (no token in URL now)
-        res.redirect(`${redirectUrl}/auth/me`);
+        res.redirect(`${redirectUrl}/me`);
     }
 );
 

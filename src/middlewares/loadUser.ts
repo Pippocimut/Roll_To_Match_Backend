@@ -9,6 +9,7 @@ export async function loadUser(req, res, next) {
     }
 
     const token = authorization
+    console.log(token)
 
     if (token) {
         const secretToken = process.env.TOKEN_SECRET
