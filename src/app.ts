@@ -13,6 +13,7 @@ import {loadUser} from 'middlewares/loadUser';
 import multer from 'multer';
 import {Client as MinioClient} from "minio";
 import * as process from "node:process";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -82,6 +83,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     }));
 
 
+    app.use(cookieParser());
     app.use(loadUser)
     app.use('/auth', express.json(), authRouter);
     const upload = multer({
