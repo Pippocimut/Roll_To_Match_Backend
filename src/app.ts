@@ -25,17 +25,6 @@ const minioClient = new MinioClient({
     secretKey: process.env.STORAGE_SECRET_KEY,
 })
 
-app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOriginRegex = /\.vercel\.app$/; // Allow *.vercel.app
-        if (origin && allowedOriginRegex.test(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    }
-}))
-
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();
@@ -74,8 +63,19 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     }));
 
     console.log('Connected to MongoDB');
+    
+    app.use('/auth', express.json(), authRouter);
 
-    app.use(cors());
+    app.use(cors({
+        origin: (origin, callback) => {
+            const allowedOriginRegex = /\.vercel\.app$/; // Allow *.vercel.app
+            if (origin && allowedOriginRegex.test(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        }
+    }))
     app.use(loadUser)
 
     const upload = multer({
@@ -131,7 +131,6 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     }
 
     //app.use(express.urlencoded({extended: false}));
-    app.use('/auth', express.json(), authRouter);
     app.use('/api', express.json(), apiRouter)
     app.use(errorHandler);
 
