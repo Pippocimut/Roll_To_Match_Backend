@@ -121,8 +121,6 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     //app.use(express.urlencoded({extended: false}));
     app.use('/auth', express.json(), authRouter);
-
-    //app.use(onlyAuthorizedUsers);
     app.use('/api', express.json(), apiRouter)
     app.use(errorHandler);
 

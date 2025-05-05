@@ -14,6 +14,8 @@ router.get("/me", (req, res) => {
     }
 });
 
+router.patch("/me", AuthController.getInstance().updateUser);
+
 router.get("/google", passport.authenticate("google", {scope: ["profile", "email", "openid"]}));
 router.get("/google/callback", passport.authenticate('google', {failureRedirect: "/login"}), async (req: Request, res: Response) => {
     const secretToken = process.env.TOKEN_SECRET

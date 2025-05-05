@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import bcryptjs from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-import { LocalUserModel, PersistedLocalUser } from '../database-models/User';
+import {LocalUserModel, PersistedLocalUser, UserModel} from '../database-models/User';
 import { MongoDocument } from '../data-types';
 import { LocalRegisterUserDTO, LocalRegisterUserZodSchema } from '../dto/LocalRegisterUserDTO';
+import {UpdateUserZodSchema} from "../dto/UpdateUserDTO";
 
 export class AuthController {
 
@@ -14,6 +15,25 @@ export class AuthController {
             AuthController.instance = new AuthController();
         }
         return AuthController.instance;
+    }
+
+    public updateUser = async (req: Request, res: Response): Promise<void> =>  {
+        const updateUserDTO = UpdateUserZodSchema.safeParse(req.body);
+        if (!updateUserDTO.success) {
+            res.status(400).send({ message: updateUserDTO.error.message });
+            return Promise.resolve();
+        }
+
+        const user = req.user
+        if (!user) {
+            res.status(400).send({ message: 'User not found' })
+            return Promise.resolve();
+        }
+
+        console.log(updateUserDTO.data);
+
+        const updateUserResult = await UserModel.updateOne({ _id: user._id }, updateUserDTO.data)
+        res.status(200).send(updateUserResult)
     }
 
     public async registerLocalUser(req: Request, res: Response): Promise<void> {

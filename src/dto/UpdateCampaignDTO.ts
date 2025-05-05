@@ -15,7 +15,7 @@ export const UpdateCampaignZodSchema = z.object({
         frequency: z.string().optional(),
         days: z.array(z.string()).optional()
     }).optional(),
-    game: z.enum(['D&D', 'Pathfinder', 'Boardgames', 'Other']).optional(),
+    game: z.enum(['D&D 5e', 'D&D 3.5e', 'Pathfinder 2', 'Boardgames', 'Other']).optional(),
     languages: z.array(z.string()).optional(),
     requirements: z.string().optional(),
     maxSeats: z.number().optional(),
