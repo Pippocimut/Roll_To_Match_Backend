@@ -64,22 +64,26 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     console.log('Connected to MongoDB');
 
+    const regex = /^https:\/\/roll-to-match-frontend.*\.pippocimuts-projects\.vercel\.app\/$/;
+
+    const allowedOrigins = [
+        "https://accounts.google.com" // Google's origin
+    ];
+
     app.use(cors({
         origin: (origin, callback) => {
-            const regex = /^roll-to-match-frontend.*\.pippocimuts-projects\.vercel\.app$/;
-
-            const allowedOrigins = [
-                regex,
-                "https://accounts.google.com"
-            ];
-            if (origin && allowedOrigins.includes(origin)) {
-                callback(null, true); // Allow the origin
+            // Allow requests with:
+            // - Origins matching the regex
+            // - Origins in the allowedOrigins array
+            if (!origin || regex.test(origin) || allowedOrigins.includes(origin)) {
+                callback(null, true); // Allow this origin
             } else {
-                callback(new Error("Not allowed by CORS"));
+                callback(new Error('Not allowed by CORS')); // Reject this origin
             }
         },
-        credentials: true, // Ensure credentials (cookies/sessions) are sent with requests
+        credentials: true // Allow cookies/tokens
     }));
+
 
 
     app.use('/auth', express.json(), authRouter);
