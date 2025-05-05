@@ -66,14 +66,18 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     app.use(cors({
         origin: (origin, callback) => {
-            const allowedOriginRegex = /\.vercel\.app$/; // Allow *.vercel.app
-            if (origin && allowedOriginRegex.test(origin)) {
-                callback(null, true);
+            const allowedOrigins = [
+                'https://roll-to-match-frontend-gyh8o3sew-pippocimuts-projects.vercel.app' // Add your frontend URL
+            ];
+            if (origin && allowedOrigins.includes(origin)) {
+                callback(null, true); // Allow the origin
             } else {
                 callback(new Error("Not allowed by CORS"));
             }
-        }
-    }))
+        },
+        credentials: true, // Ensure credentials (cookies/sessions) are sent with requests
+    }));
+
 
     app.use('/auth', express.json(), authRouter);
 
