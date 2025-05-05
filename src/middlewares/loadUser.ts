@@ -21,6 +21,7 @@ export async function loadUser(req, res, next) {
         try {
             const verified = verify(token, secretToken)
             if (verified && typeof verified === 'object' && 'id' in verified) {
+                console.log("Verified", verified)
                 req.user = await UserModel.findById(verified.id)
                 res.locals.user = req.user
                 return next()
