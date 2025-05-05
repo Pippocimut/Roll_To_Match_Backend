@@ -33,20 +33,26 @@ router.get("/google", (req, res, next) => {
     })(req, res, next); // Proper usage of the middleware
 });
 
+
 router.get(
     "/google/callback",
-    passport.authenticate("google", { failureRedirect: "/login" }),
+    passport.authenticate("google", {failureRedirect: "/login"}),
     async (req, res): Promise<void> => {
         const secretToken = process.env.TOKEN_SECRET;
 
         if (!secretToken) {
-            res.status(400).send({ message: "Secret token not found" });
-            return;
+            res.status(400).send({message: "Secret token not found"});
+            return
+        }
+
+        if (!req.session) {
+            res.status(400).send({message: "Session not found"});
+            return
         }
 
         if (!req.user) {
-            res.status(400).send({ message: "User not found" });
-            return;
+            res.status(400).send({message: "User not found"});
+            return
         }
 
         // Decode and parse the `state` parameter from the request query
@@ -55,32 +61,33 @@ router.get(
         if (state) {
             try {
                 const decodedState = JSON.parse(Buffer.from(state, "base64").toString());
-                redirectUrl = decodedState.redirectUrl;
+                redirectUrl = decodedState.redirectUrl; // Extract the redirectUrl
             } catch (error) {
                 console.error("Failed to parse state parameter:", error);
-                res.status(400).send({ message: "Invalid state parameter" });
-                return;
+                res.status(400).send({message: "Invalid state parameter"});
+                return
             }
         }
 
         if (!redirectUrl) {
-            res.status(400).send({ message: "Redirect URL missing or invalid" });
-            return;
+            res.status(400).send({message: "Redirect URL missing or invalid"});
+            return
         }
 
-        // ✅ Generate the access token
-        const accessToken = sign({ id: req.user._id }, secretToken, { expiresIn: "1d" });
+        // Generate the access token
+        const accessToken = sign(
+            {id: req.user._id},
+            secretToken,
+            {expiresIn: "1d"}
+        );
 
-        // ✅ Set the access token as an HttpOnly, secure cookie
-        res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: true, // Make sure you're using HTTPS in production
-            sameSite: "lax", // Prevents CSRF in most cases
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
-        });
+        // Attach the token to the session
+        req.session.accessToken = accessToken;
+        await req.session.save();
 
-        // ✅ Redirect to frontend (no token in URL now)
-        res.redirect(`${redirectUrl}/me`);
+        // Redirect to the frontend with the token
+        res.redirect(`${redirectUrl}/auth/acceptToken?token=${accessToken}`);
+        return
     }
 );
 
