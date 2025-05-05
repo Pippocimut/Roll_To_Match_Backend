@@ -16,9 +16,25 @@ router.get("/me", (req, res) => {
 
 router.patch("/me", AuthController.getInstance().updateUser);
 
-router.get("/google", passport.authenticate("google", {scope: ["profile", "email", "openid"]}));
+router.get("/google", (req, res, next) => {
+    const { redirectUrl } = req.query; // Get redirect URL from user
+
+    if (!redirectUrl ) {
+        return res.status(400).send({ message: "Missing redirect_uri parameter" });
+    }
+
+    // Pass redirect_uri in the `state` parameter
+    const state = Buffer.from(JSON.stringify({redirectUrl  })).toString("base64");
+
+    passport.authenticate("google", {
+        scope: ["profile", "email", "openid"],
+        state, // Attach the state
+    })(req, res, next);
+});
+
 router.get("/google/callback", passport.authenticate('google', {failureRedirect: "/login"}), async (req: Request, res: Response) => {
     const secretToken = process.env.TOKEN_SECRET
+    const redirectUrlParam = req.query.redirectUrl
     if (!secretToken) {
         res.status(400).send({message: 'Secret token not found'})
         return
@@ -36,8 +52,7 @@ router.get("/google/callback", passport.authenticate('google', {failureRedirect:
 
     req.session.accessToken = sign({id: req.user._id}, secretToken, {expiresIn: '1d'})
     req.session.save()
-    const requestingUrl = req.header('referer')
-    res.redirect(`${requestingUrl}/auth/acceptToken?token=` + req.session.accessToken);
+    res.redirect(`${ redirectUrlParam}/auth/acceptToken?token=` + req.session.accessToken);
 });
 
 /* router.get("/facebook", passport.authenticate("facebook", { scope: ["email"] }));

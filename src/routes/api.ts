@@ -4,10 +4,22 @@ import {CampaignPlayerController} from '../controllers/CampaignPlayerController'
 import {CampaignCandidatePlayerController} from 'controllers/CampaignCandidatePlayerController';
 import multer from "multer";
 import {auth as requiresAuth} from "../middlewares/authMiddleware"
+import {fromPersistedToReturnedUser} from "../adapters/User";
+import {AuthController} from "../controllers/AuthController";
 
 const router = Router();
 
 var upload = multer({dest: './uploads'});
+
+router.get("/me", requiresAuth, (req, res) => {
+    if (req.user) {
+        res.send(fromPersistedToReturnedUser(req.user));
+    } else {
+        res.status(401).send({message: 'Unauthorized'});
+    }
+});
+
+router.patch("/me", requiresAuth, AuthController.getInstance().updateUser);
 
 router.get('/campaigns', CampaignController.getInstance().getCampaigns);
 router.post('/campaign', requiresAuth, CampaignController.getInstance().createCampaign);
