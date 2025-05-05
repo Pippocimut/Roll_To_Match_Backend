@@ -64,7 +64,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     console.log('Connected to MongoDB');
 
-    app.use(cors({
+    app.use(cors(/*{
         origin: (origin, callback) => {
             const allowedOriginRegex = /\.vercel\.app$/; // Allow *.vercel.app
             if (origin && allowedOriginRegex.test(origin)) {
@@ -73,7 +73,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
                 callback(new Error("Not allowed by CORS"));
             }
         }
-    }))
+    }*/))
 
     app.use('/auth', express.json(), authRouter);
 
