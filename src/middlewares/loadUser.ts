@@ -3,12 +3,12 @@ import 'dotenv/config'
 import { UserModel } from 'database-models/User';
 
 export async function loadUser(req, res, next) {
-    const authorization = req.header('authorization')
+    const authorization = req.cookies?.accessToken;
     if (!authorization) {
         return next()
     }
 
-    const token = authorization.split(' ')[1]
+    const token = authorization
 
     if (token) {
         const secretToken = process.env.TOKEN_SECRET
