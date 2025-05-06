@@ -16,6 +16,17 @@ router.get("/me", (req, res) => {
 
 router.patch("/me", AuthController.getInstance().updateUser);
 
+router.post("/logout", (req, res) => {
+    req.session.destroy((err)=> {
+        if (err) {
+            console.error(err);
+            res.status(500).send({message: "Failed to destroy session"});
+            return
+        }
+        res.status(200).send({message: "Successfully destroyed session"});
+    })
+})
+
 router.get("/google", (req, res, next) => {
     const {redirectUrl} = req.query; // Get the redirect URL from the query
 
@@ -97,17 +108,5 @@ router.get("/facebook/callback", passport.authenticate('facebook', { failureRedi
 
 router.post('/register', AuthController.getInstance().registerLocalUser);
 router.post('/login', AuthController.getInstance().loginLocalUser);
-
-router.get("/login", (req, res) => {
-    res.render("pages/auth")
-});
-router.get("/register", (req, res) => {
-    res.render("pages/auth")
-});
-router.get("/logout", (req: Request, res) => {
-    req.session.destroy(() => {
-    });
-    res.redirect("/auth/login");
-});
 
 export default router;
