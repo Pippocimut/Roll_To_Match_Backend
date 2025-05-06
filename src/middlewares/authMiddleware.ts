@@ -9,7 +9,8 @@ export async function auth(req, res, next) {
     if (req.session && req.session.accessToken) {
         const secretToken = process.env.TOKEN_SECRET
         if (!secretToken) {
-            return res.status(400).send({ message: 'Secret token not found' })
+            res.status(400).send({ message: 'Secret token not found' })
+            return
         }
         try {
             const verified = verify(req.session.accessToken, secretToken)
@@ -22,5 +23,6 @@ export async function auth(req, res, next) {
             console.log(e)
         }
     }
-    return res.redirect('/auth/login')
+    res.status(401).send({ message: 'Unauthorized' })
+    return
 }
