@@ -70,12 +70,6 @@ export class CampaignController {
 
     public getCampaigns = async (req: Request, res: Response): Promise<void> => {
         try {
-            let userId = '';
-            if (req.user) {
-                userId = req.user._id.toString()
-                return;
-            }
-
             const query = req.query
             const searchParamsDTOResult = SearchCampaignZodSchema.safeParse(query)
             if (!searchParamsDTOResult.success) {

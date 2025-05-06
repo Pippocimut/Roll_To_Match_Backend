@@ -59,6 +59,8 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
             client: mongoose.connection.getClient(),
         }),
         cookie: {
+            httpOnly: envVariable["NODE_ENV"] == "prod",
+            sameSite: envVariable["NODE_ENV"] == "prod" ? 'none' : 'lax',
             secure: envVariable["NODE_ENV"] == "prod",
             maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
         }
