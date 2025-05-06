@@ -51,6 +51,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     pass: envVariable["MONGO_PASS"],
     dbName: envVariable["DATABASE_NAME"],
 }).then(async () => {
+    app.set('trust proxy', 1);
     app.use(session({
         secret: process.env.SESSION_SECRET || 'your-secret-key',
         resave: false,
@@ -87,8 +88,6 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
         credentials: true // Allow cookies/tokens
     }));
 
-
-    app.use(cookieParser());
     app.use(loadUser)
     app.use('/auth', express.json(), authRouter);
     const upload = multer({

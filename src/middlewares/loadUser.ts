@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { UserModel } from 'database-models/User';
 
 export async function loadUser(req, res, next) {
-    const authorization = req.session.accessToken || req.cookies.accessToken;
+    const authorization = req.session.accessToken
     if (!authorization) {
         return next()
     }
