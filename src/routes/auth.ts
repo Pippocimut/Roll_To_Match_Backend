@@ -92,6 +92,8 @@ router.get(
         req.session.accessToken = accessToken;
         await req.session.save();
 
+        console.log("Session", JSON.stringify(req.session))
+
         // Redirect to the frontend with the token
         res.redirect(`${redirectUrl}/auth/acceptToken?token=${accessToken}`);
         return

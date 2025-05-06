@@ -5,6 +5,7 @@ import { UserModel } from 'database-models/User';
 export async function auth(req, res, next) {
     console.log("Cookies",JSON.stringify(req.cookies))
     console.log("Session",JSON.stringify(req.session))
+
     if (req.session && req.session.accessToken) {
         const secretToken = process.env.TOKEN_SECRET
         if (!secretToken) {
@@ -17,7 +18,9 @@ export async function auth(req, res, next) {
                 res.locals.user = req.user
                 return next()
             }
-        } catch (e) { }
+        } catch (e) {
+            console.log(e)
+        }
     }
     return res.redirect('/auth/login')
 }
