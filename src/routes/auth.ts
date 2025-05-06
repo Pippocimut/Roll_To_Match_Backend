@@ -81,6 +81,13 @@ router.get(
             {expiresIn: "1d"}
         );
 
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true, // Prevent access to the cookie from JS
+            secure: true, // Use `true` in production (only over HTTPS)
+            sameSite: "none", // Allow cross-origin cookies
+            maxAge: 24 * 60 * 60 * 1000, // Lifetime of the cookie (1 day in this case)
+        });
+
         // Attach the token to the session
         req.session.accessToken = accessToken;
         await req.session.save();
