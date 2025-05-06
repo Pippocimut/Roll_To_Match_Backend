@@ -3,6 +3,7 @@ import 'dotenv/config'
 import { UserModel } from 'database-models/User';
 
 export async function auth(req, res, next) {
+    console.log("Session from auth", JSON.stringify(req.session, null, 2))
     if (req.session && req.session.accessToken) {
         const secretToken = process.env.TOKEN_SECRET
         if (!secretToken) {
