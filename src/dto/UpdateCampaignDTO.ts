@@ -1,6 +1,5 @@
 import { z } from 'zod'
-import { RoomModel } from '../database-models/Room'
-import {CampaignTags} from "@roll-to-match/types";
+import {CampaignTags} from "../data-types/campaign-tags";
 
 export const UpdateCampaignZodSchema = z.object({
     title: z.string().optional(),
@@ -9,7 +8,7 @@ export const UpdateCampaignZodSchema = z.object({
     latitude: z.number({message:"Not provided"}).optional(),
     longitude: z.number({message:"Not provided"}).optional(),
     price : z.number().optional(),
-    nextSession: z.date().optional(),
+    nextSession: z.string().transform(date => new Date(date)).optional(),
     schedule: z.object({
         time: z.string().optional(),
         frequency: z.string().optional(),

@@ -70,7 +70,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
     console.log('Connected to MongoDB');
 
 
-    let regex = /^https:\/\/roll-to-match-frontend[-\w]*-pippocimuts-projects\.vercel\.app$/;
+    let regex = /^https:\/\/roll-to-match-frontend[-\w]*\.vercel\.app$/;
     if (envVariable["NODE_ENV"] == "dev") regex = /^http:\/\/localhost:\d+$/;
     
     const allowedOrigins = [

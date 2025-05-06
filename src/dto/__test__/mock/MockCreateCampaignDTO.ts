@@ -1,5 +1,6 @@
-import {CampaignTags, Days, Frequencies} from "@roll-to-match/types";
+import { Days, Frequencies} from "@roll-to-match/types";
 import { CreateCampaignDTO } from "@roll-to-match/dto";
+import {CampaignTags} from "../../../data-types/campaign-tags";
 
 export function getCreateCampaignDTO(createCampaignDTO?: Partial<CreateCampaignDTO>): CreateCampaignDTO {
     return {
@@ -15,7 +16,7 @@ export function getCreateCampaignDTO(createCampaignDTO?: Partial<CreateCampaignD
             frequency: Frequencies.Weekly
         },
         maxSeats: 5,
-        tags: [CampaignTags.DND],
+        tags: [CampaignTags.violence],
         ...createCampaignDTO
     }
 }

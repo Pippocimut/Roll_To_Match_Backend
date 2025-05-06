@@ -12,13 +12,4 @@ export enum PostStatus {
     EXPIRED = "expired"
 }
 
-export enum CampaignTags {
-    DND = "dnd",
-    BOARDGAMES = "boardgames",
-    CARDGAMES = "cardgames",
-    WARGAMES = "wargames",
-    MINIATURES = "miniatures",
-    RPG = "rpg"
-}
-
 export type MongoDocument<T> = T & {_id: mongoose.Types.ObjectId};

@@ -117,7 +117,13 @@ export class CampaignController {
 
     public updateCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
-            const updateCampaignDTO: UpdateCampaignDTO = UpdateCampaignZodSchema.parse(req.body)
+            const updateCampaignDTOFetch= UpdateCampaignZodSchema.safeParse(req.body)
+            if ( updateCampaignDTOFetch.success === false) {
+                res.status(400).send(updateCampaignDTOFetch.error.message);
+                return
+            }
+
+            const updateCampaignDTO = updateCampaignDTOFetch.data
 
             const campaign = await this.campaignService.getCampaign(req.params.id)
             const user = req.user

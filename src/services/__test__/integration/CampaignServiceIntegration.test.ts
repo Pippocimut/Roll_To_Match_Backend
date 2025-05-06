@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 import {SearchCampaignDTO, SearchCampaignZodSchema, UpdateCampaignDTO} from "@roll-to-match/dto";
 import {RoomModel, UserModel, CampaignModel} from "@roll-to-match/models";
 import {CampaignService} from "@roll-to-match/services";
-import {CampaignTags} from "@roll-to-match/types";
 import {describe, it} from "@jest/globals";
 import {getCreateCampaignDTO} from "@roll-to-match/dto-test/mock/MockCreateCampaignDTO"
 import {getMockCampaign} from "@roll-to-match/models-test/mock/MockCampaign";
 import 'dotenv/config';
 import {assertEnvVariables} from "util/assertEnvVariables";
+import {CampaignTags} from "../../../data-types/campaign-tags";
 
 const {ObjectId} = require('mongoose').Types;
 
@@ -76,7 +76,7 @@ describe('CampaignService', () => {
             it('should return a list of campaigns', async () => {
                 const searchParamsDTO: SearchCampaignDTO = {
                     filter: {
-                        tags: [CampaignTags.DND, CampaignTags.BOARDGAMES]
+                        tags: [CampaignTags.newPlayersWelcome]
                     },
                     lat: 0,
                     lng: 0,

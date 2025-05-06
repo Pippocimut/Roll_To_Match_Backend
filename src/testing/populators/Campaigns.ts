@@ -3,11 +3,11 @@ import {faker} from "@faker-js/faker";
 import {PersistedCampaign} from "@roll-to-match/models";
 import 'dotenv/config';
 import {Populator} from '../data-types/populator';
-import {CampaignTags} from '../../data-types/temp'
 import RoomPopulator from './Rooms';
 import UserPopulator from './Users';
 import {Games} from '../../data-types/games'
 import {Days, Frequencies} from "../../data-types";
+import {CampaignTags} from "../../data-types/campaign-tags";
 
 const {DocumentArray} = mongoose.Types;
 

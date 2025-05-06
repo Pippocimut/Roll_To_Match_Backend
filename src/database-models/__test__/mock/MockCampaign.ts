@@ -1,5 +1,6 @@
-import {CampaignTags, Days, Frequencies} from "@roll-to-match/types";
+import {Days, Frequencies} from "@roll-to-match/types";
 import {PersistedCampaign} from "@roll-to-match/models";
+import {CampaignTags} from "../../../data-types/campaign-tags";
 
 const {ObjectId, DocumentArray} = require('mongoose').Types;
 
@@ -11,7 +12,7 @@ export function getMockCampaign(campaign?: Partial<PersistedCampaign>): Persiste
             type: "Point",
             coordinates: [0, 0]
         },
-        tags: [CampaignTags.BOARDGAMES, CampaignTags.CARDGAMES],
+        tags: [CampaignTags.violence],
         registeredAt: new Date(),
         playerQueue: new DocumentArray([]),
         activePlayers: new DocumentArray([]),

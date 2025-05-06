@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Days, Frequencies, MongoDocument} from "../data-types";
 import {PersistedUser} from "./User";
+import {CampaignTags} from "../data-types/campaign-tags";
 
 export interface PersistedCampaign {
     title: string;
@@ -25,7 +26,7 @@ export interface PersistedCampaign {
     languages: string[];
     requirements: string;
     contactInfo?: string;
-    tags: string[];
+    tags: CampaignTags[];
     registeredAt: Date;
     playerQueue: MongoDocument<PersistedUser>[];
     activePlayers: MongoDocument<PersistedUser>[];
@@ -105,6 +106,7 @@ export const CampaignSchema = new mongoose.Schema<PersistedCampaign>({
     },
     tags: [{
         type: String,
+        enum: CampaignTags,
         required: true
     }],
     locationName: {

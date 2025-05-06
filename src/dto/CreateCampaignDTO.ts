@@ -1,17 +1,18 @@
 import { z } from 'zod'
 import { Days, Frequencies} from '@roll-to-match/types'
+import {CampaignTags} from "../data-types/campaign-tags";
 
 export const CreateCampaignZodSchema = z.object({
     title: z.string(),
     description: z.string(),
-    tags: z.array(z.string()).optional(),
     locationName : z.string().optional(),
     latitude: z.number({message:"Not provided"}).optional(),
     longitude: z.number({message:"Not provided"}).optional(),
     price : z.number().default(0),
     contactInfo: z.string().optional(),
     image: z.string().optional(),
-    nextSession: z.date().optional(),
+    tags: z.array(z.nativeEnum(CampaignTags)).optional(),
+    nextSession: z.string().transform(date => new Date(date)).optional(),
     schedule: z.object({
         time: z.string(),
         frequency: z.string(z.nativeEnum(Frequencies)),
