@@ -3,10 +3,11 @@ import {AuthController} from '../controllers/AuthController';
 import passport from '../auth/passport';
 import {sign} from 'jsonwebtoken';
 import {fromPersistedToReturnedUser} from "../adapters/User";
+import {auth as requiresAuthorization} from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.get("/me", (req, res) => {
+router.get("/me", requiresAuthorization, (req, res) => {
     if (req.user) {
         res.send(fromPersistedToReturnedUser(req.user));
     } else {
@@ -14,10 +15,10 @@ router.get("/me", (req, res) => {
     }
 });
 
-router.patch("/me", AuthController.getInstance().updateUser);
+router.patch("/me", requiresAuthorization, AuthController.getInstance().updateUser);
 
-router.post("/logout", (req, res) => {
-    req.session.destroy((err)=> {
+router.post("/logout", requiresAuthorization, (req, res) => {
+    req.session.destroy((err) => {
         if (err) {
             console.error(err);
             res.status(500).send({message: "Failed to destroy session"});
