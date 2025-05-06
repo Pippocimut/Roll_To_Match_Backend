@@ -97,6 +97,8 @@ router.get(
         req.session.accessToken = accessToken;
         await req.session.save();
 
+        console.log("Session", JSON.stringify(req.session, null, 2))
+
         res.redirect(`${redirectUrl}`);
         return
     }
