@@ -38,6 +38,8 @@ router.get(
     "/google/callback",
     passport.authenticate("google", {failureRedirect: "/login"}),
     async (req, res): Promise<void> => {
+        console.log("Got to the callback");
+
         const secretToken = process.env.TOKEN_SECRET;
 
         if (!secretToken) {
@@ -81,21 +83,10 @@ router.get(
             {expiresIn: "1d"}
         );
 
-        res.cookie("accessToken", accessToken, {
-            httpOnly: true, // Prevent access to the cookie from JS
-            secure: true, // Use `true` in production (only over HTTPS)
-            sameSite: "none", // Allow cross-origin cookies
-            maxAge: 24 * 60 * 60 * 1000, // Lifetime of the cookie (1 day in this case)
-        });
-
-        // Attach the token to the session
         req.session.accessToken = accessToken;
         await req.session.save();
 
-        console.log("Session", JSON.stringify(req.session))
-
-        // Redirect to the frontend with the token
-        res.redirect(`${redirectUrl}/auth/acceptToken?token=${accessToken}`);
+        res.redirect(`${redirectUrl}`);
         return
     }
 );

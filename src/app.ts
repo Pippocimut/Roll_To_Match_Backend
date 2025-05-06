@@ -41,6 +41,7 @@ const envVariable = assertEnvVariables([
     'STORAGE_SSL',
     'STORAGE_ACCESS_KEY',
     'STORAGE_SECRET_KEY',
+    'NODE_ENV'
 ])
 
 console.log(JSON.stringify(envVariable))
@@ -58,16 +59,16 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
             client: mongoose.connection.getClient(),
         }),
         cookie: {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
+            secure: envVariable["NODE_ENV"] == "prod",
             maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
         }
     }));
 
     console.log('Connected to MongoDB');
 
-    const regex = /^https:\/\/roll-to-match-frontend[-\w]*-pippocimuts-projects\.vercel\.app$/;
+
+    let regex = /^https:\/\/roll-to-match-frontend[-\w]*-pippocimuts-projects\.vercel\.app$/;
+    if (envVariable["NODE_ENV"] == "dev") regex = /^http:\/\/localhost:\d+$/;
     
     const allowedOrigins = [
         "https://accounts.google.com" // Google's origin

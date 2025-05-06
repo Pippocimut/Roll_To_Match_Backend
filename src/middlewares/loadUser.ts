@@ -3,14 +3,12 @@ import 'dotenv/config'
 import { UserModel } from 'database-models/User';
 
 export async function loadUser(req, res, next) {
-    const authorization = req.cookies?.accessToken;
-    console.log("Cookies",JSON.stringify(req.cookies))
+    const authorization = req.session.accessToken || req.cookies.accessToken;
     if (!authorization) {
         return next()
     }
 
     const token = authorization
-    console.log(token)
 
     if (token) {
         const secretToken = process.env.TOKEN_SECRET
@@ -21,7 +19,6 @@ export async function loadUser(req, res, next) {
         try {
             const verified = verify(token, secretToken)
             if (verified && typeof verified === 'object' && 'id' in verified) {
-                console.log("Verified", verified)
                 req.user = await UserModel.findById(verified.id)
                 res.locals.user = req.user
                 return next()

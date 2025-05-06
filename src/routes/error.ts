@@ -10,9 +10,7 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
         title = 'Invalid JSON'
         message = 'The request body is not valid JSON'
         statusError = 400
-    }
-
-    if (err instanceof Error && 'status' in err && typeof err.status === 'number') {
+    }else if ('status' in err && typeof err.status === 'number') {
         statusError = err.status
         title = err.message
     }

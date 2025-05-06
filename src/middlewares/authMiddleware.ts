@@ -3,9 +3,6 @@ import 'dotenv/config'
 import { UserModel } from 'database-models/User';
 
 export async function auth(req, res, next) {
-    console.log("Cookies",JSON.stringify(req.cookies))
-    console.log("Session",JSON.stringify(req.session))
-
     if (req.session && req.session.accessToken) {
         const secretToken = process.env.TOKEN_SECRET
         if (!secretToken) {
@@ -15,6 +12,7 @@ export async function auth(req, res, next) {
         try {
             const verified = verify(req.session.accessToken, secretToken)
             if (verified && typeof verified === 'object' && 'id' in verified) {
+                console.log(verified)
                 req.user = await UserModel.findById(verified.id)
                 res.locals.user = req.user
                 return next()

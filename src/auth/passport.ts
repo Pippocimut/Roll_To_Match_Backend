@@ -60,7 +60,7 @@ passport.use(new FacebookStrategy({
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "https://final-year-project-backend-service-819188550192.europe-north1.run.app/auth/google/callback",
+    callbackURL: process.env.AUTH_CALLBACK_URL+"/auth/google/callback",
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
 },
     async function (accessToken, refreshToken, profile, cb) {

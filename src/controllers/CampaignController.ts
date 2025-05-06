@@ -102,17 +102,16 @@ export class CampaignController {
 
     public getCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
-            let userId = '';
-            if (req.user) {
-                userId = req.user._id.toString()
-                return;
-            }
+            console.log("Getting campaign")
 
             const campaign = await this.campaignService.getCampaign(req.params.id)
             if (!campaign) {
+                console.log("Campaign not found")
                 res.status(404).send('Campaign not found')
                 return
             }
+
+            console.log("Campaign found")
             res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign))
         } catch (err) {
             if (err instanceof Error) {
