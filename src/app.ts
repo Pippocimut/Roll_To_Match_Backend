@@ -2,6 +2,7 @@ import './register-paths';
 import mongoose from 'mongoose';
 import express from 'express';
 import "dotenv/config";
+import "express-async-errors"
 import {errorHandler} from './routes/error';
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
@@ -72,7 +73,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     let regex = /^https:\/\/roll-to-match-frontend[-\w]*\.vercel\.app$/;
     if (envVariable["NODE_ENV"] == "dev") regex = /^http:\/\/localhost:\d+$/;
-    
+
     const allowedOrigins = [
         "https://accounts.google.com" // Google's origin
     ];
@@ -88,8 +89,18 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
         credentials: true // Allow cookies/tokens
     }));
 
-    app.use(loadUser)
+    app.use((req, res, next) => {
+        try {
+            next()
+        } catch (e) {
+            console.log(e)
+            next(e);
+        }
+    })
+
+
     app.use('/auth', express.json(), authRouter);
+    app.use(loadUser)
     const upload = multer({
         dest: '/tmp/', // Temporary storage location
         limits: {
@@ -106,7 +117,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
         const bucketExists = await minioClient.bucketExists('image-bucket-bbk-project');
 
-        if (!bucketExists){
+        if (!bucketExists) {
             await minioClient.makeBucket('image-bucket-bbk-project', 'eu-north-1')
             const policy = {
                 Version: "2012-10-17",

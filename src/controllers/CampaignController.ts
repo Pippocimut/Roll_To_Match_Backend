@@ -4,7 +4,7 @@ import {SearchCampaignDTO, SearchCampaignZodSchema} from "../dto/SearchCampaignD
 import {Client} from "@googlemaps/google-maps-services-js"
 import {CampaignService} from "../services/CampaignService";
 import CampaignAdapter from "../adapters/Campaign";
-import {Request, Response} from "express";
+import {NextFunction, Request, Response} from "express";
 import {CampaignModel, RoomModel} from "@roll-to-match/models";
 import {RoomService} from "../services/RoomService";
 import {Client as MinioClient} from "minio";
@@ -14,7 +14,7 @@ export class CampaignController {
     private static instance: CampaignController;
     private campaignService: CampaignService;
     private roomService: RoomService;
-    private client : MinioClient;
+    private client: MinioClient;
 
     public static getInstance(): CampaignController {
         if (!CampaignController.instance) {
@@ -58,6 +58,12 @@ export class CampaignController {
             const roomId = room._id.toString()
 
             const campaign = await this.campaignService.createCampaign(campaignDTO, roomId, userId)
+
+            if (!campaign) {
+                res.status(500).send('Internal server error');
+                return;
+            }
+
             const adaptedCampaign = CampaignAdapter.fromPersistedToReturnedCampaign(campaign)
 
             res.status(200).send(adaptedCampaign)
@@ -79,7 +85,10 @@ export class CampaignController {
 
             const searchParamsDTO = searchParamsDTOResult.data
             const result = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
+
             const adaptedCampaigns = result.campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
+
+            console.log(JSON.stringify(adaptedCampaigns, null, 2))
             const sendBack = {
                 pagination: result.pagination,
                 campaigns: adaptedCampaigns,
@@ -94,31 +103,23 @@ export class CampaignController {
         }
     }
 
-    public getCampaign = async (req: Request, res: Response): Promise<void> => {
-        try {
-            console.log("Getting campaign")
+    public getCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
-            const campaign = await this.campaignService.getCampaign(req.params.id)
-            if (!campaign) {
-                console.log("Campaign not found")
-                res.status(404).send('Campaign not found')
-                return
-            }
-
-            console.log("Campaign found")
-            res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign))
-        } catch (err) {
-            if (err instanceof Error) {
-                res.status(500).json({error: err.message})
-                this.CampaignControllerHandleError(err, res)
-            }
+        const campaign = await this.campaignService.getCampaign(req.params.id)
+        if (!campaign) {
+            console.log("Campaign not found")
+            res.status(404).send('Campaign not found')
+            return
         }
+
+        res.status(200).send(CampaignAdapter.fromPersistedToReturnedCampaign(campaign))
+        return
     }
 
     public updateCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
-            const updateCampaignDTOFetch= UpdateCampaignZodSchema.safeParse(req.body)
-            if ( updateCampaignDTOFetch.success === false) {
+            const updateCampaignDTOFetch = UpdateCampaignZodSchema.safeParse(req.body)
+            if (updateCampaignDTOFetch.success === false) {
                 res.status(400).send(updateCampaignDTOFetch.error.message);
                 return
             }
@@ -133,7 +134,7 @@ export class CampaignController {
                 return
             }
 
-            if (!campaign){
+            if (!campaign) {
                 res.status(404).send({message: 'Campaign not found'})
                 return
             }
@@ -153,7 +154,7 @@ export class CampaignController {
         }
     }
 
-    public deleteCampaign = async(req: Request, res: Response): Promise<void> => {
+    public deleteCampaign = async (req: Request, res: Response): Promise<void> => {
         try {
             const campaign = await this.campaignService.getCampaign(req.params.id)
             const user = req.user
@@ -163,7 +164,7 @@ export class CampaignController {
                 return
             }
 
-            if (!campaign){
+            if (!campaign) {
                 res.status(404).send({message: 'Campaign not found'})
                 return
             }

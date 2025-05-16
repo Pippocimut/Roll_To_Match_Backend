@@ -17,7 +17,7 @@ router.get("/me", requiresAuthorization, (req, res) => {
 
 router.patch("/me", requiresAuthorization, AuthController.getInstance().updateUser);
 
-router.post("/logout", requiresAuthorization, (req, res) => {
+router.post("/logout", (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             console.error(err);

@@ -1,4 +1,4 @@
-import {PersistedCampaign} from "../database-models/Campaign";
+import {PersistedCampaign, PopulatedPersistedCampaign} from "../database-models/Campaign";
 import {MongoDocument} from "../data-types";
 import {AdaptedPlayer} from "./Player";
 import {fromPersistedToReturnedPlayer} from "./Player";
@@ -8,7 +8,7 @@ export type AdaptedCampaign = {
     id: string,
     title: string,
     description: string,
-    owner: string,
+    owner: AdaptedPlayer,
     room: string,
     locationName?:string,
     contactInfo?:string;
@@ -30,7 +30,7 @@ export type AdaptedCampaign = {
     activePlayers: AdaptedPlayer[],
 }
 
-function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<PersistedCampaign>): AdaptedCampaign {
+function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<PopulatedPersistedCampaign>): AdaptedCampaign {
     const playerQueue = persistedCampaign.playerQueue.map(player => fromPersistedToReturnedPlayer(player))
     const activePlayers = persistedCampaign.activePlayers.map(player => fromPersistedToReturnedPlayer(player))
 
@@ -41,7 +41,7 @@ function fromPersistedToReturnedCampaign(persistedCampaign: MongoDocument<Persis
         id: persistedCampaign._id.toString(),
         title: persistedCampaign.title,
         description: persistedCampaign.description,
-        owner: persistedCampaign.owner.toString(),
+        owner: fromPersistedToReturnedPlayer(persistedCampaign.owner),
         room: persistedCampaign.room.toString(),
         locationName: persistedCampaign.locationName,
         tags: persistedCampaign.tags,

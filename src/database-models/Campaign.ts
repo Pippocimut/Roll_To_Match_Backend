@@ -1,14 +1,20 @@
 import mongoose from "mongoose";
-import { Days, Frequencies, MongoDocument} from "../data-types";
+import {Days, Frequencies, MongoDocument} from "../data-types";
 import {PersistedUser} from "./User";
 import {CampaignTags} from "../data-types/campaign-tags";
+import {PersistedRoom} from "./Room";
+
+export interface PopulatedPersistedCampaign extends Omit<PersistedCampaign,
+    "owner"> {
+    owner: MongoDocument<PersistedUser>
+}
 
 export interface PersistedCampaign {
     title: string;
     description: string;
     owner: mongoose.Types.ObjectId;
     room: mongoose.Types.ObjectId;
-    locationName? :string;
+    locationName?: string;
     nextSession?: Date;
     location: {
         type: string;

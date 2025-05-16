@@ -15,5 +15,5 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
         title = err.message
     }
 
-    res.status(statusError).render('pages/error', { title, message });
+    res.status(statusError).send({ title, message })
 };

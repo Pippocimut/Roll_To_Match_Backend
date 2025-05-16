@@ -5,6 +5,7 @@ export type AdaptedPlayer = {
     id: string,
     username: string,
     email: string,
+    imageUrl?: string,
 }
 
 export function fromPersistedToReturnedPlayer(persistedPlayer: MongoDocument<PersistedUser>): AdaptedPlayer {
@@ -12,6 +13,7 @@ export function fromPersistedToReturnedPlayer(persistedPlayer: MongoDocument<Per
         id: persistedPlayer._id.toString(),
         username: persistedPlayer.username,
         email: persistedPlayer.email,
+        imageUrl: persistedPlayer.imageUrl || undefined
     }
 }
 

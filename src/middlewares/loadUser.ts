@@ -23,7 +23,12 @@ export async function loadUser(req, res, next) {
                 res.locals.user = req.user
                 return next()
             }
-        } catch (e) { }
+        } catch (e) {
+            if(e instanceof Error)
+                if (e.name === 'TokenExpiredError') {
+                    res.redirect('auth/logout')
+                }
+        }
     }
     next()
 }

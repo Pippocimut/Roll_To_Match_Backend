@@ -1,4 +1,4 @@
-import {CampaignModel, PersistedCampaign} from "../database-models/Campaign";
+import {CampaignModel, PersistedCampaign, PopulatedPersistedCampaign} from "../database-models/Campaign";
 import {CreateCampaignDTO} from "../dto/CreateCampaignDTO";
 import {UpdateCampaignDTO} from "../dto/UpdateCampaignDTO";
 import {Days, DeepPartial, Frequencies, MongoDocument} from "@roll-to-match/types";
@@ -11,7 +11,7 @@ export type PaginatedCampaigns = {
         limit: number;
         offset: number;
     }
-    campaigns: MongoDocument<PersistedCampaign>[]
+    campaigns: MongoDocument<PopulatedPersistedCampaign>[]
 }
 
 export type CampaignSearchParams = {
@@ -40,11 +40,11 @@ export type CampaignSearchParams = {
 }
 
 export interface ICampaignService {
-    createCampaign(campaignDTO: CreateCampaignDTO, image: string, roomId: string, ownerId: string): Promise<MongoDocument<PersistedCampaign>>;
+    createCampaign(campaignDTO: CreateCampaignDTO, image: string, roomId: string, ownerId: string): Promise<MongoDocument<PopulatedPersistedCampaign> | null>;
 
     getCampaigns(searchParamsDTO: CampaignSearchParams): Promise<PaginatedCampaigns>;
 
-    getCampaign(campaignId: string): Promise<MongoDocument<PersistedCampaign> | null>
+    getCampaign(campaignId: string): Promise<MongoDocument<PopulatedPersistedCampaign> | null>
 
     updateCampaign(campaignId: string, campaignDTO: UpdateCampaignDTO): Promise<MongoDocument<PersistedCampaign>>
 
@@ -59,7 +59,7 @@ export class CampaignService implements ICampaignService {
         this.campaignModel = campaignModel;
     }
 
-    public async createCampaign(campaignDTO: CreateCampaignDTO, roomId: string, ownerId: string): Promise<MongoDocument<PersistedCampaign>> {
+    public async createCampaign(campaignDTO: CreateCampaignDTO, roomId: string, ownerId: string): Promise<MongoDocument<PopulatedPersistedCampaign> | null> {
 
         const location = {
             type: "Point",
@@ -93,8 +93,9 @@ export class CampaignService implements ICampaignService {
             game: campaignDTO.game,
             activePlayers: new DocumentArray([]),
         }
+        const returnedCampaign = await this.campaignModel.create(campaign)
 
-        return await this.campaignModel.create(campaign);
+        return this.campaignModel.findById(returnedCampaign._id).populate("owner") as Promise<MongoDocument<PopulatedPersistedCampaign> | null>;
     }
 
     public async getCampaigns(searchParamsDTO: CampaignSearchParams, userId?: string): Promise<PaginatedCampaigns> {
@@ -207,19 +208,30 @@ export class CampaignService implements ICampaignService {
         if (searchParamsDTO.limit) {
             pipeline.push({$limit: searchParamsDTO.limit})
         }
+
+        pipeline.push({$lookup: {from: "users", localField: "owner", foreignField: "_id", as: "owner"}})
+        pipeline.push({
+            $addFields: {
+                owner: { $arrayElemAt: ["$owner", 0] }
+            }
+
+        })
+
+        const campaigns = await CampaignModel.aggregate(pipeline).exec()
+
         return {
             pagination: {
                 total: totalCount,
                 limit: searchParamsDTO.limit,
                 offset: (searchParamsDTO.page - 1) * searchParamsDTO.limit,
             },
-            campaigns: await CampaignModel.aggregate(pipeline).exec()
+            campaigns: campaigns
         }
     }
 
     public async getCampaign(campaignId: string):
-        Promise<MongoDocument<PersistedCampaign> | null> {
-        return await CampaignModel.findById(campaignId);
+        Promise<MongoDocument<PopulatedPersistedCampaign> | null> {
+        return CampaignModel.findById(campaignId).populate("owner") as Promise<MongoDocument<PopulatedPersistedCampaign> | null>;
     }
 
     public async updateCampaign(campaignId: string, campaignDTO: UpdateCampaignDTO):

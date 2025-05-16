@@ -1,11 +1,11 @@
 import { MongoDocument } from "data-types/temp"
 import { PersistedRoom } from "database-models/Room"
-import { PersistedCampaign } from "database-models/Campaign"
+import {PersistedCampaign, PopulatedPersistedCampaign} from "database-models/Campaign"
 import CampaignAdapter, { AdaptedCampaign } from "./Campaign"
 import { CampaignModel } from "database-models/Campaign"
 
 export type PopulatedPersistedRoom = Omit<PersistedRoom, "campaigns"> & {
-    campaigns: MongoDocument<PersistedCampaign>[]
+    campaigns: MongoDocument<PopulatedPersistedCampaign>[]
 }
 
 export type AdaptedRoom = {

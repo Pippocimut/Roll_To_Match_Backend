@@ -113,15 +113,15 @@ export class CampaignPopulator extends Populator {
             description: faker.lorem.paragraph(),
             image: "",
             schedule: {
-                days: faker.helpers.arrayElements(Object.values(Days), {min: 1, max: 2}),
+                days: faker.helpers.arrayElements(Object.values(Days), {min: 1, max: 1}),
                 time: faker.date.anytime().toLocaleTimeString(navigator.language, {
                     hour: '2-digit',
                     minute: '2-digit'
                 }),
                 frequency: faker.helpers.enumValue(Frequencies)
             },
-            maxSeats: faker.number.int({min: 1, max: 6}),
-            price: faker.number.float({min: 1.00, max: 20.00, fractionDigits: 2}),
+            maxSeats: faker.number.int({min: 1, max: 4}),
+            price: faker.number.float({min: 0.00, max: 20.00, fractionDigits: 2}),
             languages: [
                 faker.lorem.word()
             ],
