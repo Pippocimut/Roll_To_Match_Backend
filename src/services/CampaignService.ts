@@ -167,7 +167,6 @@ export class CampaignService implements ICampaignService {
         }
 
         if (searchParamsDTO.seatsLeft) {
-            console.log("seats left", searchParamsDTO.seatsLeft)
             pipeline.push({
                     $match: {
                         $expr: {
@@ -199,7 +198,14 @@ export class CampaignService implements ICampaignService {
             pipeline.push({$sort: sort})
         }
 
-        const totalCount = await CampaignModel.countDocuments(filter);
+        const totalCountPipeline = [
+            ...pipeline, // Use the same match/filtering/sorting stages
+            { $count: "total" }, // Add a `$count` stage for total documents
+        ];
+
+        const totalResults = await CampaignModel.aggregate(totalCountPipeline).exec();
+        const totalCount = totalResults[0]?.total || 0;
+
 
         if (searchParamsDTO.page) {
             pipeline.push({$skip: (searchParamsDTO.page - 1) * searchParamsDTO.limit})
@@ -256,6 +262,7 @@ export class CampaignService implements ICampaignService {
             nextSession: campaignDTO?.nextSession,
             requirements: campaignDTO?.requirements,
             price: campaignDTO?.price,
+            image: campaignDTO?.image,
             languages: campaignDTO?.languages,
             maxSeats: campaignDTO?.maxSeats,
             game: campaignDTO?.game,

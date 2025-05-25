@@ -20,6 +20,7 @@ router.get("/me", requiresAuth, (req, res) => {
 });
 
 router.patch("/me", requiresAuth, AuthController.getInstance().updateUser);
+router.delete("/me", requiresAuth, AuthController.getInstance().deleteUser);
 
 router.get('/campaigns', CampaignController.getInstance().getCampaigns);
 router.post('/campaign', requiresAuth, CampaignController.getInstance().createCampaign);

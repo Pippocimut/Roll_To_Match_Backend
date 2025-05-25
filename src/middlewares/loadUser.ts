@@ -26,7 +26,7 @@ export async function loadUser(req, res, next) {
         } catch (e) {
             if(e instanceof Error)
                 if (e.name === 'TokenExpiredError') {
-                    res.redirect('auth/logout')
+
                 }
         }
     }

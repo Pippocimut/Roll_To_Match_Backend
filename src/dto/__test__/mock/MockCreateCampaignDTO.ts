@@ -10,6 +10,7 @@ export function getCreateCampaignDTO(createCampaignDTO?: Partial<CreateCampaignD
         longitude: 0,
         game: "D&D 5e",
         price: 5,
+        image:"dada",
         schedule: {
             days: [Days.Thursday],
             time:"morning",

@@ -5,6 +5,7 @@ import {LocalUserModel, PersistedLocalUser, UserModel} from '../database-models/
 import { MongoDocument } from '../data-types';
 import { LocalRegisterUserDTO, LocalRegisterUserZodSchema } from '../dto/LocalRegisterUserDTO';
 import {UpdateUserZodSchema} from "../dto/UpdateUserDTO";
+import {CampaignModel, RoomModel} from "@roll-to-match/models";
 
 export class AuthController {
 
@@ -30,10 +31,25 @@ export class AuthController {
             return Promise.resolve();
         }
 
-        console.log(updateUserDTO.data);
-
         const updateUserResult = await UserModel.updateOne({ _id: user._id }, updateUserDTO.data)
         res.status(200).send(updateUserResult)
+    }
+
+    public deleteUser = async (req: Request, res: Response): Promise<void> =>  {
+        const user = req.user
+        if (!user) {
+            res.status(400).send({ message: 'User not found' })
+            return Promise.resolve();
+        }
+
+        const deleteCampaigns = await UserModel.deleteMany({ owner: user._id })
+        const removeFromJoinedCampaings = await CampaignModel.updateMany({ playerQueue: user._id }, { $pull: { playerQueue: user._id } })
+        const removeFromJoinedCampaings2 = await CampaignModel.updateMany({ activePlayers: user._id }, { $pull: { activePlayers: user._id } })
+        const removeRooms = await RoomModel.deleteMany({owner: user._id})
+        const removeCampaigns = await CampaignModel.deleteMany({owner: user._id})
+
+        const deleteUserResult = await UserModel.deleteOne({ _id: user._id })
+        res.status(200).send(deleteUserResult)
     }
 
     public async registerLocalUser(req: Request, res: Response): Promise<void> {

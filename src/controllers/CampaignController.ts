@@ -1,7 +1,6 @@
 import {CreateCampaignDTO, CreateCampaignZodSchema} from "../dto/CreateCampaignDTO";
-import {UpdateCampaignDTO, UpdateCampaignZodSchema} from "../dto/UpdateCampaignDTO";
-import {SearchCampaignDTO, SearchCampaignZodSchema} from "../dto/SearchCampaignDTO";
-import {Client} from "@googlemaps/google-maps-services-js"
+import { UpdateCampaignZodSchema} from "../dto/UpdateCampaignDTO";
+import {SearchCampaignZodSchema} from "../dto/SearchCampaignDTO";
 import {CampaignService} from "../services/CampaignService";
 import CampaignAdapter from "../adapters/Campaign";
 import {NextFunction, Request, Response} from "express";
@@ -86,9 +85,10 @@ export class CampaignController {
             const searchParamsDTO = searchParamsDTOResult.data
             const result = await this.campaignService.getCampaigns(searchParamsDTO)//, userCheckDTO.id)
 
+            console.log("Campaigns found",result.campaigns.length)
+
             const adaptedCampaigns = result.campaigns.map(CampaignAdapter.fromPersistedToReturnedCampaign)
 
-            console.log(JSON.stringify(adaptedCampaigns, null, 2))
             const sendBack = {
                 pagination: result.pagination,
                 campaigns: adaptedCampaigns,
@@ -97,7 +97,6 @@ export class CampaignController {
 
         } catch (err) {
             if (err instanceof Error) {
-                res.status(500).json({error: err.message})
                 this.CampaignControllerHandleError(err, res)
             }
         }
@@ -139,7 +138,7 @@ export class CampaignController {
                 return
             }
 
-            if (campaign.owner && campaign.owner.toString() !== user._id.toString()) {
+            if (campaign.owner && campaign.owner._id.toString() !== user._id.toString()) {
                 res.status(401).send({message: 'Unauthorized'})
                 return
             }
