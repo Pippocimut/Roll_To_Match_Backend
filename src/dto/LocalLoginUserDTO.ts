@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
-export const LoginUserZodSchema = z.object({
-    username: z.string().min(3).max(256).optional(),
-    email: z.string().email().min(6).max(256).optional(),
-    password: z.string().min(6).max(1024),
+export const LocalLoginUserZodSchema = z.object({
+    username: z.string().min(3).max(256).transform(value => value.trim()).transform(value => value.toLowerCase()).optional(),
+    email: z.string().email().min(6).max(256).transform(value => value.trim()).transform(value => value.toLowerCase()).optional(),
+    password: z.string().min(6).max(1024).transform(value => value.trim()).transform(value => value.toLowerCase()),
     slug: z.string().min(3).max(256).optional()
 }).refine(data => {
     if (!data.username && !data.email && !data.slug){
@@ -13,4 +13,4 @@ export const LoginUserZodSchema = z.object({
 });
 
 
-export type LoginUserDTO = z.infer<typeof LoginUserZodSchema>
+export type LocalLoginUserDTO = z.infer<typeof LocalLoginUserZodSchema>

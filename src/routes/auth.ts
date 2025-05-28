@@ -50,7 +50,6 @@ router.get(
     "/google/callback",
     passport.authenticate("google", {failureRedirect: "/login"}),
     async (req, res): Promise<void> => {
-        console.log("Got to the callback");
 
         const secretToken = process.env.TOKEN_SECRET;
 
@@ -105,11 +104,7 @@ router.get(
     }
 );
 
-/* router.get("/facebook", passport.authenticate("facebook", { scope: ["email"] }));
-router.get("/facebook/callback", passport.authenticate('facebook', { failureRedirect: "/login" }), (req, res) => { res.redirect("/"); });
-*/
-
-router.post('/register', AuthController.getInstance().registerLocalUser);
+router.post('/register', AuthController.getInstance().registerLocalUser, AuthController.getInstance().loginLocalUser);
 router.post('/login', AuthController.getInstance().loginLocalUser);
 
 export default router;

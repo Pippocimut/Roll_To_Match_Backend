@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import bcryptjs from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import {LocalUserModel, PersistedLocalUser, UserModel} from '../database-models/User';
@@ -6,6 +6,7 @@ import { MongoDocument } from '../data-types';
 import { LocalRegisterUserDTO, LocalRegisterUserZodSchema } from '../dto/LocalRegisterUserDTO';
 import {UpdateUserZodSchema} from "../dto/UpdateUserDTO";
 import {CampaignModel, RoomModel} from "@roll-to-match/models";
+import { LocalLoginUserZodSchema } from 'dto/LocalLoginUserDTO';
 
 export class AuthController {
 
@@ -52,7 +53,7 @@ export class AuthController {
         res.status(200).send(deleteUserResult)
     }
 
-    public async registerLocalUser(req: Request, res: Response): Promise<void> {
+    public async registerLocalUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const registerLocalUserDTO: LocalRegisterUserDTO = await LocalRegisterUserZodSchema.parseAsync(req.body);
             if (!registerLocalUserDTO) {
@@ -77,9 +78,9 @@ export class AuthController {
                 date: new Date()
             }
 
-            const user = await LocalUserModel.create(persistedUser)
 
-            const secretToken = process.env.SECRET_TOKEN
+
+            const secretToken = process.env.TOKEN_SECRET
             if (!secretToken) {
                 res.status(400).send({ message: 'Secret token not found' })
                 return Promise.resolve();
@@ -90,11 +91,12 @@ export class AuthController {
                 return Promise.resolve();
             }
 
+            const user = await LocalUserModel.create(persistedUser)
             req.session.accessToken = sign({ id: user._id }, secretToken, { expiresIn: '1d' })
             await req.session.save()
 
             const savedUser = await user.save()
-            res.redirect('/')
+            next()
         } catch (err) {
             console.error(err)
             res.status(400).send({ message: err })
@@ -103,7 +105,7 @@ export class AuthController {
 
     public async loginLocalUser(req: Request, res: Response): Promise<void> {
         try {
-            const loginLocalUserDTO = await LocalRegisterUserZodSchema.parseAsync(req.body);
+            const loginLocalUserDTO = await LocalLoginUserZodSchema.parseAsync(req.body);
             if (!loginLocalUserDTO) {
                 res.status(400).send({ message: 'Invalid request body' });
                 return Promise.resolve();
@@ -111,14 +113,14 @@ export class AuthController {
 
             const user: MongoDocument<PersistedLocalUser> | null = await LocalUserModel.findOne({
                 $or: [
-                    { email: req.body.email },
-                    { username: req.body.username },
-                    { slug: req.body.slug }
+                    { email: loginLocalUserDTO.email },
+                    { username: loginLocalUserDTO.username  },
+                    { slug: loginLocalUserDTO.slug  }
                 ]
             })
 
             if (!user) {
-                res.status(400).send({ message: 'LocalUserModel does not exist' })
+                res.status(400).send({ message: 'User does not exist' })
                 return Promise.resolve();
             }
 
@@ -128,7 +130,7 @@ export class AuthController {
                 return Promise.resolve();
             }
 
-            const secretToken = process.env.SECRET_TOKEN
+            const secretToken = process.env.TOKEN_SECRET
             if (!secretToken) {
                 res.status(400).send({ message: 'Secret token not found' })
                 return Promise.resolve();
@@ -139,8 +141,9 @@ export class AuthController {
             req.session.accessToken = token
             await req.session.save()
 
-            res.status(200).redirect('/')
+            res.status(200).send({message:"Logged in successfully"})
         } catch (err) {
+            console.error(err)
             res.status(400).send({ message: err })
         }
     }

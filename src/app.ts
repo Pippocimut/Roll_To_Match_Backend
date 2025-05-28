@@ -97,7 +97,6 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
         }
     })
 
-
     app.use('/auth', express.json(), authRouter);
 
     const upload = multer({
@@ -150,9 +149,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
     if (await minioClient.bucketExists('image-bucket-bbk-project')) {
         console.log('Storage Bucket exists');
-    }
-
-    //app.use(express.urlencoded({extended: false}));
+    };
     app.use('/api', express.json(), apiRouter)
     app.use(errorHandler);
 
