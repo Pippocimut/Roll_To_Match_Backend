@@ -1,4 +1,4 @@
-import {Days, Frequencies} from "@roll-to-match/types";
+import {Days, Frequencies, Games} from "@roll-to-match/types";
 import {PersistedCampaign} from "@roll-to-match/models";
 import {CampaignTags} from "../../../data-types/campaign-tags";
 
@@ -18,7 +18,7 @@ export function getMockCampaign(campaign?: Partial<PersistedCampaign>): Persiste
         activePlayers: new DocumentArray([]),
         owner: new ObjectId(),
         room: new ObjectId(),
-        game: "D&D",
+        game: Games.DND5E,
         languages: [],
         schedule: {
             days: [Days.Thursday],

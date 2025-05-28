@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {Days, Frequencies, MongoDocument} from "../data-types";
+import {Days, Frequencies, Games, MongoDocument} from "../data-types";
 import {PersistedUser} from "./User";
 import {CampaignTags} from "../data-types/campaign-tags";
 import {PersistedRoom} from "./Room";
@@ -28,7 +28,7 @@ export interface PersistedCampaign {
     maxSeats: number;
     image: string;
     price: number;
-    game: string;
+    game: Games;
     languages: string[];
     requirements: string;
     contactInfo?: string;
@@ -101,8 +101,8 @@ export const CampaignSchema = new mongoose.Schema<PersistedCampaign>({
     },
     game: {
         type: String,
-        enum: ['D&D 5e', 'Pathfinder 2', 'Boardgames', 'Other'],
-        default: 'D&D 5e',
+        enum: Games,
+        default: Games.DND5E,
         required: true
     },
     registeredAt: {

@@ -24,7 +24,7 @@ export class CampaignCandidatePlayerController {
         return CampaignCandidatePlayerController.instance;
     }
 
-    public createCandidatePlayer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public joinCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const {campaignId} = req.params
 

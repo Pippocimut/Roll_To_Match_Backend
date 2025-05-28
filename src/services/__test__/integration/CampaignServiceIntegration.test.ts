@@ -1,49 +1,66 @@
 import mongoose from "mongoose";
 import {SearchCampaignDTO, SearchCampaignZodSchema, UpdateCampaignDTO} from "@roll-to-match/dto";
-import {RoomModel, UserModel, CampaignModel} from "@roll-to-match/models";
+import {RoomModel, UserModel, CampaignModel, PersistedCampaign} from "@roll-to-match/models";
 import {CampaignService} from "@roll-to-match/services";
 import {describe, it} from "@jest/globals";
 import {getCreateCampaignDTO} from "@roll-to-match/dto-test/mock/MockCreateCampaignDTO"
 import {getMockCampaign} from "@roll-to-match/models-test/mock/MockCampaign";
 import 'dotenv/config';
-import {assertEnvVariables} from "util/assertEnvVariables";
 import {CampaignTags} from "../../../data-types/campaign-tags";
+import {Games} from "@roll-to-match/types";
+import {MongoMemoryServer} from "mongodb-memory-server";
 
 const {ObjectId} = require('mongoose').Types;
 
-const databaseName = "roll-to-match-test";
+describe('CampaignService',() => {
 
-describe('CampaignService', () => {
+    let mongod;
+
     describe('integration tests', () => {
         const service = new CampaignService(CampaignModel);
         beforeAll(async () => {
-            if (process.env === undefined) {
-                throw new Error('No env found')
-            }
+            mongod = await MongoMemoryServer.create()
+            const mongoUri = await mongod.getUri()
 
-            const envVariables = assertEnvVariables([
-                'BARE_MONGO_URL',
-                'MONGO_USER',
-                'MONGO_PASS'
-            ])
+            await mongoose.connect(mongoUri, {})
 
+        })
 
-            await mongoose.connect(envVariables["BAR_MONGO_URL"], {
-                user: envVariables["MONGO_USER"],
-                pass: envVariables["MONGO_PASS"],
-                dbName: databaseName,
-            })
+        afterEach(async () => {
+            RoomModel.deleteMany({})
+            UserModel.deleteMany({})
+            CampaignModel.deleteMany({})
+        })
+
+        afterAll(async () => {
+            await mongoose.disconnect()
+            await mongod.stop()
         })
 
         describe('when creating a campaign', () => {
             describe('and the data is valid', () => {
                 it('should create a campaign', async () => {
-                    const room = await RoomModel.find({}).limit(1);
-                    if (room.length === 0) {
-                        throw new Error('No rooms found');
-                    }
+                    const user = await UserModel.create({
+                        email: "<EMAIL>",
+                        password: "<PASSWORD>",
+                        name: "test",
+                        slug: "test",
+                        username: "test",
+                        role: "user",
+                        avatar: "test",
+                        googleId: "test",
+                        facebookId: "test",
+                        githubId: "test",
+                        discordId: "test",
+                    })
 
-                    const user = await UserModel.findById(room[0].owner);
+                    console.log(user)
+
+                    const room = await RoomModel.create({
+                        title: "Hello",
+                        campaigns:[],
+                        owner: user._id
+                    })
 
                     if (!user) {
                         throw new Error('No user found');
@@ -51,9 +68,10 @@ describe('CampaignService', () => {
 
                     const dto = getCreateCampaignDTO()
 
-                    const campaignsInRoom = await RoomModel.deleteMany({room: room[0]._id})
+                    const campaignsInRoom = await RoomModel.deleteMany({room: room._id})
 
-                    const campaign = await service.createCampaign(dto, room[0]._id.toString(), user._id.toString());
+                    const campaign = await service.createCampaign(dto, room._id.toString(), user._id.toString());
+
                 })
             })
             describe('and the data is invalid', () => {
@@ -70,20 +88,16 @@ describe('CampaignService', () => {
 
             })
         })
+
         describe('when getting campaigns', () => {
-            beforeAll(async () => {
-            })
             it('should return a list of campaigns', async () => {
                 const searchParamsDTO: SearchCampaignDTO = {
-                    filter: {
-                        tags: [CampaignTags.newPlayersWelcome]
-                    },
                     lat: 0,
                     lng: 0,
                     radius: 1000,
                     sortBy: ["location"],
                     limit: 10,
-                    page:1,
+                    page: 1,
                 }
 
 
@@ -99,8 +113,8 @@ describe('CampaignService', () => {
                 const result = await service.getCampaigns(searchParamsDTO);
 
                 expect(result).toBeDefined();
-                expect(result.campaigns.length).toBeGreaterThanOrEqual(0);
-                expect(result.campaigns.length).toBeLessThanOrEqual(10);
+                expect(result.campaigns.length).toBeGreaterThanOrEqual(1);
+                expect(result.campaigns.length).toBeLessThanOrEqual(1);
 
                 await CampaignModel.deleteOne({_id: createCampaign._id.toString()})
             })
@@ -123,19 +137,35 @@ describe('CampaignService', () => {
 
                 expect(campaign).toBeDefined();
             })
-            it('should return an error if the campaign is not found', async () => {
-                const campaigns = await CampaignModel.find({}).limit(1);
-                await CampaignModel.deleteOne({_id: campaigns[0]._id.toString()})
 
-                const campaign = await service.getCampaign(campaigns[0]._id.toString());
-
-                const createCampaignAgain = getMockCampaign(campaigns[0])
-                await CampaignModel.create(createCampaignAgain)
+            it('should return null if the campaign is not found', async () => {
+                const campaign = await CampaignModel.create(getMockCampaign())
+                await CampaignModel.deleteOne({_id: campaign._id.toString()})
+                const campaignReturned = await service.getCampaign(campaign._id.toString());
+                expect(campaignReturned).toBeNull()
 
             })
         })
 
         describe('when updating a campaign', () => {
+            describe('and the input is invalid', () => {
+
+                const input: UpdateCampaignDTO[] = [
+                    {
+                        game: "Mock" as Games
+                    }
+                ]
+
+                it.each(input)('should not change the campaign', async (dto) => {
+                    const campaign = getMockCampaign({})
+                    const createdCampaign = await CampaignModel.create(campaign)
+
+                    expect(service.updateCampaign(createdCampaign._id.toString(), dto)).rejects.toThrow();
+
+                    await CampaignModel.deleteOne({_id: createdCampaign._id.toString()})
+                })
+            })
+
             it('should update a campaign', async () => {
                 const campaign = getMockCampaign({title: "scooby doo"})
                 const createdCampaign = await CampaignModel.create(campaign)
@@ -144,10 +174,13 @@ describe('CampaignService', () => {
                     title: "new title",
                 }
 
-                const updatedCampaign = await service.updateCampaign(createdCampaign._id.toString(), updateDTO);
+                await service.updateCampaign(createdCampaign._id.toString(), updateDTO);
+                const updatedCampaign = await CampaignModel.findById(createdCampaign._id.toString())
 
                 expect(updatedCampaign).toBeDefined();
-                expect(updatedCampaign.title).toBe("new title");
+                expect(updatedCampaign).not.toBeNull();
+                expect(updatedCampaign!.title).toBe("new title");
+                expect(updatedCampaign!.description).toBe(campaign.description);
 
                 await CampaignModel.deleteOne({_id: createdCampaign._id.toString()})
             })

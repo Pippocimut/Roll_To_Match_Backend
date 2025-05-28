@@ -1,4 +1,4 @@
-import { Days, Frequencies} from "@roll-to-match/types";
+import {Days, Frequencies, Games} from "@roll-to-match/types";
 import { CreateCampaignDTO } from "@roll-to-match/dto";
 import {CampaignTags} from "../../../data-types/campaign-tags";
 
@@ -8,7 +8,7 @@ export function getCreateCampaignDTO(createCampaignDTO?: Partial<CreateCampaignD
         description: "description",
         latitude: 0,
         longitude: 0,
-        game: "D&D 5e",
+        game: Games.DND5E,
         price: 5,
         image:"dada",
         schedule: {

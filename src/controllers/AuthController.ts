@@ -117,7 +117,7 @@ export class AuthController {
                 ]
             })
 
-            if (!user || user === null) {
+            if (!user) {
                 res.status(400).send({ message: 'LocalUserModel does not exist' })
                 return Promise.resolve();
             }

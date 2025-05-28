@@ -1,5 +1,5 @@
 import {z} from 'zod'
-import {Days, Frequencies} from '@roll-to-match/types'
+import {Days, Frequencies, Games} from '@roll-to-match/types'
 import {CampaignTags} from "../data-types/campaign-tags";
 
 export const CreateCampaignZodSchema = z.object({
@@ -20,7 +20,7 @@ export const CreateCampaignZodSchema = z.object({
         frequency: z.string(z.nativeEnum(Frequencies)),
         days: z.array(z.nativeEnum(Days))
     }),
-    game: z.enum(['D&D 5e', 'D&D 3.5e', 'Pathfinder 2', 'Boardgames', 'Other']).optional().default('D&D 5e'),
+    game: z.nativeEnum(Games).optional().default(Games.DND5E),
     languages: z.array(z.string()).optional(),
     requirements: z.string().optional(),
     maxSeats: z.number(),

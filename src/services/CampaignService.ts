@@ -15,9 +15,8 @@ export type PaginatedCampaigns = {
 }
 
 export type CampaignSearchParams = {
-    limit: number;
-    page: number;
-    //sortBy?: string[];
+    limit?: number;
+    page?: number;
     lat?: number;
     lng?: number;
     radius: number;
@@ -32,11 +31,6 @@ export type CampaignSearchParams = {
     game?: string;
     price?: number;
     seatsLeft?: number;
-    /* filter?: {
-        room?: string;
-        owner?: string;
-        tags?: string[];
-    } */
 }
 
 export interface ICampaignService {
@@ -180,19 +174,9 @@ export class CampaignService implements ICampaignService {
             )
         }
 
-        const sort: any = {};
-        /*  if (searchParamsDTO.sortBy) {
-             if (searchParamsDTO.sortBy.includes('location')) {
-                 sort["distance"] = 1;
-             }
-             if (searchParamsDTO.sortBy.includes('title')) {
-                 sort["title"] = 1;
-             }
-             if (searchParamsDTO.sortBy.includes('registeredAt')) {
-                 sort["registeredAt"] = 1;
-             }
-         } */
-        sort["_id"] = 1; // Always include _id to ensure a consistent sort order
+        const sort: any = {
+            "_id": 1
+        };
 
         if (Object.keys(sort).length > 0) {
             pipeline.push({$sort: sort})
@@ -200,15 +184,15 @@ export class CampaignService implements ICampaignService {
 
         const totalCountPipeline = [
             ...pipeline, // Use the same match/filtering/sorting stages
-            { $count: "total" }, // Add a `$count` stage for total documents
+            {$count: "total"}, // Add a `$count` stage for total documents
         ];
 
         const totalResults = await CampaignModel.aggregate(totalCountPipeline).exec();
         const totalCount = totalResults[0]?.total || 0;
 
-
-        if (searchParamsDTO.page) {
+        if (searchParamsDTO.page && searchParamsDTO.limit && searchParamsDTO.page > 0) {
             pipeline.push({$skip: (searchParamsDTO.page - 1) * searchParamsDTO.limit})
+
         }
 
         if (searchParamsDTO.limit) {
@@ -218,7 +202,7 @@ export class CampaignService implements ICampaignService {
         pipeline.push({$lookup: {from: "users", localField: "owner", foreignField: "_id", as: "owner"}})
         pipeline.push({
             $addFields: {
-                owner: { $arrayElemAt: ["$owner", 0] }
+                owner: {$arrayElemAt: ["$owner", 0]}
             }
 
         })
@@ -226,10 +210,14 @@ export class CampaignService implements ICampaignService {
         const campaigns = await CampaignModel.aggregate(pipeline).exec()
 
         return {
-            pagination: {
+            pagination: searchParamsDTO.page && searchParamsDTO.limit ? {
                 total: totalCount,
                 limit: searchParamsDTO.limit,
-                offset: (searchParamsDTO.page - 1) * searchParamsDTO.limit,
+                offset: ((searchParamsDTO.page - 1) * searchParamsDTO.limit),
+            } : {
+                total: totalCount,
+                limit: 0,
+                offset: 0,
             },
             campaigns: campaigns
         }
@@ -254,11 +242,7 @@ export class CampaignService implements ICampaignService {
             description: campaignDTO.description,
             location: location,
             tags: tags,
-            schedule: {
-                days: campaignDTO?.schedule?.days as Days[],
-                time: campaignDTO?.schedule?.time,
-                frequency: campaignDTO?.schedule?.frequency as Frequencies,
-            },
+            schedule: campaignDTO.schedule,
             nextSession: campaignDTO?.nextSession,
             requirements: campaignDTO?.requirements,
             price: campaignDTO?.price,
@@ -268,7 +252,15 @@ export class CampaignService implements ICampaignService {
             game: campaignDTO?.game,
         }
 
-        const updatedCampaign = await CampaignModel.findByIdAndUpdate(campaignId, campaignUpdate);
+        const updatedCampaign = await CampaignModel.findByIdAndUpdate(campaignId, {
+            $set: campaignUpdate
+        }, {
+            new: true,
+            runValidators: true,
+            validateModifiedOnly: true,
+            context: 'query',
+        });
+
         if (!updatedCampaign) {
             throw new Error('Campaign not found');
         }
@@ -277,7 +269,7 @@ export class CampaignService implements ICampaignService {
 
     public async deleteCampaign(campaignId: string): Promise<MongoDocument<PersistedCampaign>> {
         const deleted = await CampaignModel.findByIdAndDelete(campaignId);
-        if (!deleted || deleted === null) {
+        if (!deleted) {
             throw new Error('Campaign not found');
         }
         return deleted;

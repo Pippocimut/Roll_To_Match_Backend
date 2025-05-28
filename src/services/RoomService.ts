@@ -2,9 +2,6 @@ import {MongoDocument} from "../data-types";
 import {PersistedRoom, RoomModel} from "@roll-to-match/models";
 import {faker} from "@faker-js/faker";
 
-const {ObjectId, DocumentArray} = require('mongoose').Types;
-
-
 export interface IRoomService {
     createRandomRoom(ownerId: string): Promise<MongoDocument<PersistedRoom>>;
 
@@ -23,6 +20,7 @@ export class RoomService implements IRoomService {
         let getRoomByName = await this.roomModel.findOne({
             title: slug
         })
+
         while (getRoomByName != null) {
             const slug = faker.lorem.slug() + Math.ceil(Math.random() * 1000);
             getRoomByName = await this.roomModel.findOne({

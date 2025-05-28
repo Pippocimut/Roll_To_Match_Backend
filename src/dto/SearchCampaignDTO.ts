@@ -16,14 +16,14 @@ export const SearchCampaignZodSchema = z.object({
             return 9;
         }
         return valNum
-    }),
+    }).optional(),
     page: z.string().default("1").transform((val) => {
         const valNum = Number(val);
         if (isNaN(valNum)) {
             return 1;
         }
         return valNum
-    }),
+    }).optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
     price: z.string().transform(parseFloat).optional(),
     time: z.string().optional(),

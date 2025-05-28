@@ -29,7 +29,7 @@ router.get('/campaign/:id', CampaignController.getInstance().getCampaign);
 router.patch('/campaign/:id', requiresAuth, CampaignController.getInstance().updateCampaign);
 router.delete('/campaign/:id', requiresAuth, CampaignController.getInstance().deleteCampaign);
 
-router.post('/campaign/:campaignId/join', requiresAuth, CampaignCandidatePlayerController.getInstance().createCandidatePlayer);
+router.post('/campaign/:campaignId/join', requiresAuth, CampaignCandidatePlayerController.getInstance().joinCampaign);
 router.delete('/campaign/:campaignId/player/:playerId', requiresAuth, CampaignCandidatePlayerController.getInstance().deleteCandidatePlayer);
 
 router.post('/campaign/:campaignId/player/:playerId', requiresAuth, CampaignPlayerController.createPlayer);
