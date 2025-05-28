@@ -10,7 +10,6 @@ import cors from 'cors';
 import authRouter from "./routes/auth";
 import apiRouter from './routes/api';
 import {assertEnvVariables} from 'util/assertEnvVariables';
-import {loadUser} from 'middlewares/loadUser';
 import multer from 'multer';
 import {Client as MinioClient} from "minio";
 import * as process from "node:process";
@@ -100,7 +99,7 @@ mongoose.connect(envVariable["BARE_MONGO_URL"], {
 
 
     app.use('/auth', express.json(), authRouter);
-    //app.use(loadUser)
+
     const upload = multer({
         dest: '/tmp/', // Temporary storage location
         limits: {

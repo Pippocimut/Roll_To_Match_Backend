@@ -32,7 +32,7 @@ router.delete('/campaign/:id', requiresAuth, CampaignController.getInstance().de
 router.post('/campaign/:campaignId/join', requiresAuth, CampaignCandidatePlayerController.getInstance().joinCampaign);
 router.delete('/campaign/:campaignId/player/:playerId', requiresAuth, CampaignCandidatePlayerController.getInstance().deleteCandidatePlayer);
 
-router.post('/campaign/:campaignId/player/:playerId', requiresAuth, CampaignPlayerController.createPlayer);
-router.delete('/campaign/:campaignId/active-player/:playerId', requiresAuth, CampaignPlayerController.kickPlayer);
+router.post('/campaign/:campaignId/player/:playerId', requiresAuth, CampaignPlayerController.getInstance().createPlayer);
+router.delete('/campaign/:campaignId/active-player/:playerId', requiresAuth, CampaignPlayerController.getInstance().kickPlayer);
 
 export default router;

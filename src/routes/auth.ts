@@ -3,11 +3,11 @@ import {AuthController} from '../controllers/AuthController';
 import passport from '../auth/passport';
 import {sign} from 'jsonwebtoken';
 import {fromPersistedToReturnedUser} from "../adapters/User";
-import {auth as requiresAuthorization} from "../middlewares/authMiddleware";
+import {auth as requiresAuth} from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.get("/me", requiresAuthorization, (req, res) => {
+router.get("/me", requiresAuth, (req, res) => {
     if (req.user) {
         res.send(fromPersistedToReturnedUser(req.user));
     } else {
@@ -15,7 +15,7 @@ router.get("/me", requiresAuthorization, (req, res) => {
     }
 });
 
-router.patch("/me", requiresAuthorization, AuthController.getInstance().updateUser);
+router.patch("/me", requiresAuth, AuthController.getInstance().updateUser);
 
 router.post("/logout", (req, res) => {
     req.session.destroy((err) => {
